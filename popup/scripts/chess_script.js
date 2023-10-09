@@ -1,22 +1,6 @@
 /* PRELOAD */
 
-var isDown = false;   // Tracks status of mouse button
-
-const SLEEP_INTERVAL = 1000; // One second
-
-/* Sleep for a given number of milliseconds */
-const sleep = ms => new Promise(r => setTimeout(r, ms));
-
-const await_page_load = async () => {
-    /*
-        Wait until the 'username' text appears on the page
-        before moving into the main function.
-    */
-    while (document.getElementsByClassName('user-username-component').length === 0) {
-        // console.log('Waiting for page to load');
-        await sleep(SLEEP_INTERVAL);
-    }
-};
+   // Tracks status of mouse button
 
 /* END PRELOAD */
 
@@ -137,67 +121,10 @@ const main = async () => {
 
     const PGN = build_PGN(pieces, last_move_pair);
 
-    return PGN;
-};
 
+    /* MOVE LATER */
 
-const create_controls_objects = (controls_container) => {
-
-    controls_container.addEventListener('mousedown', () => {
-        isDown = true;
-    }, true);
-
-    document.addEventListener('mouseup', () => {
-        isDown = false;
-    }, true);
-
-    document.addEventListener('mousemove', (e) => {
-        e.preventDefault();
-
-        if (isDown) {
-            var deltaX = e.clientX;
-            var deltaY = e.clientY;
-            var rect = controls_container.getBoundingClientRect();
-            controls_container.style.left = deltaX - rect.width + 'px';
-            controls_container.style.top  = deltaY - rect.height + 'px';
-        }
-
-     }, true);
-    
-    controls_container.innerHTML = `
-        <button id="controls-get-pgn" style="color: red">[Get PGN]</button>
-        <h4 id='controls-pgn-result'></h4>
-    `;
-
-    return controls_container;
-}
-
-const style_controls = (controls_container) => {
-    controls_container.style.position = 'absolute';
-    controls_container.style.backgroundColor = 'black';
-    controls_container.style.padding = '1rem';
-    controls_container.style.width = '50%';
-    controls_container.style.color = 'red';
-
-    return controls_container;
-}
-
-
-
-const build_controls = () => {
     let msg = new SpeechSynthesisUtterance();
-
-    let controls_container = document.createElement('div');
-
-    controls_container.id = 'voice-controls-container';
-
-    controls_container = create_controls_objects(controls_container);
-    
-    controls_container = style_controls(controls_container);
-
-    
-
-    document.getElementById('board-layout-main').appendChild(controls_container);
 
     document.getElementById('controls-get-pgn').addEventListener('click', async () => {
         msg.text = await main().then(PGN => PGN);
@@ -205,7 +132,17 @@ const build_controls = () => {
 
         window.speechSynthesis.speak(msg);
     });
-}
+
+    /* MOVE LATER */
+
+    return PGN;
+};
+
+
+
+
+
+
 
 /* 
     Once the 'download' button appears, the board is no 
@@ -215,4 +152,8 @@ const build_controls = () => {
     since the board initially flashes in the default state before loading
 */
 
-await_page_load().then(build_controls).then(main);
+// await_page_load().then(build_controls).then(main);
+
+export {
+    main
+}

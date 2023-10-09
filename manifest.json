@@ -4,14 +4,8 @@
     "version": "1.0",
     "description": "This extension provides increased auditory feedback for chess.com games.",
     "permissions": [
-      "activeTab", 
-      "scripting", 
-      "tabs"
+      "activeTab"
     ],
-    "host_permissions": ["https://*/*"],
-    "externally_connectable": {
-      "matches": ["https://www.chess.com/*"]
-    },
     "action": {
       "default_icon": {
         "16": "icons/icon-16.png",
@@ -26,11 +20,16 @@
     },
     "content_scripts": [{
       "matches": ["https://www.chess.com/play/computer/*", "https://www.chess.com/game/live/*"],
-      "js": ["/popup/scripts/chess_script.js"]
+      "js": ["/popup/scripts/main.js"],
+      "css": ["/popup/css/controls.css"]
     }],
     "web_accessible_resources": [{
-      "resources": ["/popup/html/buttons.html"],
-      "matches": ["<all_urls>"]
-
+      "matches": ["<all_urls>"],
+      "resources": [
+        "/popup/scripts/load_script.js",
+        "/popup/scripts/chess_script.js",
+        "/popup/scripts/control_script.js",
+        "/popup/html/controls.html"
+      ]
     }]
   }
