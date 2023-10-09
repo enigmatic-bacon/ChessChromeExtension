@@ -1,11 +1,18 @@
 {
     "manifest_version": 3,
-    "name": "Your Extension Name",
+    "name": "Chess Visual Helper",
     "version": "1.0",
-    "description": "Description of your extension",
-    "permissions": ["activeTab"],
+    "description": "This extension provides increased auditory feedback for chess.com games.",
+    "permissions": [
+      "activeTab", 
+      "scripting", 
+      "tabs"
+    ],
+    "host_permissions": ["https://*/*"],
+    "externally_connectable": {
+      "matches": ["https://www.chess.com/*"]
+    },
     "action": {
-      "default_popup": "popup/popup.html",
       "default_icon": {
         "16": "icons/icon-16.png",
         "48": "icons/icon-48.png",
@@ -16,5 +23,14 @@
       "16": "icons/icon-16.png",
       "48": "icons/icon-48.png",
       "128": "icons/icon-128.png"
-    }
+    },
+    "content_scripts": [{
+      "matches": ["https://www.chess.com/play/computer/*", "https://www.chess.com/game/live/*"],
+      "js": ["/popup/scripts/chess_script.js"]
+    }],
+    "web_accessible_resources": [{
+      "resources": ["/popup/html/buttons.html"],
+      "matches": ["<all_urls>"]
+
+    }]
   }

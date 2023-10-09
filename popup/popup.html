@@ -1,9 +1,18 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Hello World Extension</title>
+  	<title>Extension Home</title>
+  	<link rel="stylesheet" href="/popup/static/popup.css">
+  	<script defer src="/popup/scripts/popup.js"></script>
 </head>
 <body>
-  <h1>Hello, World!</h1>
+  	<div class="popup-main-container">
+    	<div class="chess-button-controls">
+			<button id="start-script">Start</button>
+      		<button id="get-pgn-btn">Get PGN</button>
+    	</div>
+    
+    <h3 id="PGN"></h3>
+  	</div>
 </body>
 </html>
