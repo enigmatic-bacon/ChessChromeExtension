@@ -22,5 +22,28 @@
 
     await add_container_movement();
 
-    main();
+    const msg = new SpeechSynthesisUtterance();
+
+    document.getElementById('controls-get-pgn').addEventListener('click', async () => {
+        
+        msg.text = await main().then(PGN => PGN);
+
+        document.getElementById('controls-pgn-result').innerHTML = msg.text;
+
+        // window.speechSynthesis.speak(msg);
+    });
+
 })();
+
+/*
+
+    let msg = new SpeechSynthesisUtterance();
+
+    document.getElementById('controls-get-pgn').addEventListener('click', async () => {
+        msg.text = await main().then(PGN => PGN);
+        document.getElementById('controls-pgn-result').innerHTML = msg.text;
+
+        window.speechSynthesis.speak(msg);
+    });
+
+*/

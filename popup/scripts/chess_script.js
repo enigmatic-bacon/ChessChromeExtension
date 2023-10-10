@@ -1,99 +1,143 @@
-/* PRELOAD */
 
-   // Tracks status of mouse button
+const WHITE = 'w';
+const BLACK = 'b';
+const EMPTY = '';
 
-/* END PRELOAD */
-
-const resolve_piece_type = (piece_html) => {
-    
-    const piece_class = String(piece_html.className);
-    /* Contains (b/w)(piece type) */
-    const piece_type_info = piece_class.split(' ')[1].split('');
-
-    /* Return uppercase piece type if white, lowercase if black */
-    return piece_type_info[0] === 'w' ? piece_type_info[1].toUpperCase() : piece_type_info[1].toLowerCase();
+class Coordinates {
+    constructor (file, rank) {
+        this.file = file;
+        this.rank = rank;
+    }
 }
 
-const get_piece_coordinates = (piece_html) => String(piece_html.className).slice(-2).split('').reverse()
+class Piece {
+    /* Build a piece object from a piece html element */
+    constructor(htmlElement) {
+        /* 
+            Example: <div class="piece [color (w/b)][type] square-[file][rank]" 
+            To Note: The classList can appear in any order, so we can't rely on
+                     the order of the classes in the htmlElement.classList array
+        */
 
-/* Build the board state from the html fragments */
-const build_board = (pieces) => {
-    
-    const board = Array(8).fill().map(_ => Array(8).fill(0))
+        const classList = htmlElement.classList;
 
-    for(let i = 0; i < pieces.length; i++) {
-        try {
-            const piece = pieces[i];
-            const coords = get_piece_coordinates(piece);
-            const piece_type = resolve_piece_type(piece);
+        classList.forEach(className => {
+            if (className.startsWith('piece')) { return; }
 
-            board[coords[0] - 1][coords[1] - 1] = piece_type;
-        } catch (e) {
-            continue;
+            if (className.startsWith('square')) {
+                const pos_info = className.split('-')[1];
+
+                const file = pos_info.slice(0, 1);
+                const rank = pos_info.slice(1);
+
+                this.coordinates = new Coordinates(file, rank);
+
+                return;
+            }
+
+            this.type = className.slice(1);
+            this.color = className.slice(0, 1);
+        });
+
+        /* Capitalize the type if the piece is white */
+        if (this.color == WHITE) {
+            this.type = this.type.toUpperCase();
+        } else {
+            // Should already be lowercase, but just in case
+            this.type = this.type.toLowerCase();
         }
     }
 
-    /* Reverse the board so that it is in the black-orientation */
-    return board.reverse();
+    toString() {
+        return `${this.color}-${this.type} (${this.file}, ${this.rank})`
+    }
 }
 
-/* Build the PGN string from the board state given as html fragments */
-const build_PGN = (pieces, last_move_pair) => {
+const build_board = (pieces) => {
 
-    const board = build_board(pieces);
+    const board = Array(8).fill().map(() => Array(8).fill(''));
 
-    var PGN = '';
+    pieces.forEach(piece_html => {
+        const piece = new Piece(piece_html);
 
-    for(let i = 0; i < board.length; i++) {
-        const row = board[i];
+        board[piece.coordinates.rank - 1][piece.coordinates.file - 1] = piece;
+    });
 
-        for(let j = 0; j < row.length; j++) {
-            // Replace white-spaces with the number
-            // of consecutive white-spaces before the piece
-            if(row[j] === 0) {
-                let count = 0;
-                while(row[j + count] === 0) {
-                    count++;
-                }
+    return board;
+}
 
-                PGN += count;
-                j += count - 1;
+const get_pgn = (board) => {
+
+    let PGN = '';
+    let whitespace_counter = 0;
+
+    /* 
+        Loop backwards and left-right to get the PGN.
+        PGN is recorded from the black side first.
+    */
+    for(let i = board.length - 1; i >= 0; i--) {
+        for(let j = 0; j < board.length; j++) {
+            if (board[i][j] == EMPTY) {
+                whitespace_counter++;
                 continue;
             }
 
-            PGN += row[j];
+            if (whitespace_counter !== 0) {
+                PGN += whitespace_counter;
+                whitespace_counter = 0;
+            }
+
+            PGN += board[i][j].type;
         }
 
-        PGN += '/';
+        if (whitespace_counter !== 0) {
+            PGN += whitespace_counter;
+            whitespace_counter = 0;
+        }
+
+        if (i !== 0) {
+            PGN += '/';
+        }
     }
-
-    PGN = PGN.slice(0, -1);
-
-    // PGN += ' ' + get_turn(pieces, last_move_pair);
 
     return PGN;
 }
 
-/* Return 'b' if black is to move next, 'w' if white is to move next */
-const get_turn = (pieces, last_move_pair) => {
-    const last_move_coords = [];
-    
-    for(let i = 0; i < last_move_pair.length; i++) {
-        const last_move = last_move_pair[i];
-        last_move_coords.push(get_piece_coordinates(last_move));
-    }
+const get_turn = (board, last_move_pair) => {
 
-    for(let i = 0; i < pieces.length; i++) {
-        const piece = pieces[i];
-        const coords = get_piece_coordinates(piece);
+    const move_coords = [];
 
-        if(coords[0] === last_move_coords[0][0] && coords[1] === last_move_coords[0][1]) {
-            return String(piece.className).split(' ')[1][0] == 'b' ? 'w' : 'b';
+    last_move_pair.forEach(html_move => {
+        html_move.classList.forEach(className => {
+            if (className.startsWith('square')) {
+                const pos_info = className.split('-')[1];
+
+                const file = pos_info.slice(0, 1);
+                const rank = pos_info.slice(1);
+
+                move_coords.push(new Coordinates(file, rank));
+            }
+        });
+    });
+
+    let last_moved_piece;
+
+    move_coords.forEach(coord => {
+        if (board[coord.rank - 1][coord.file - 1] == EMPTY) {
+            return;
         }
+
+        last_moved_piece = board[coord.rank - 1][coord.file - 1];
+    });
+
+    if (last_moved_piece.color == WHITE) {
+        return BLACK;
     }
 
-    return 'b';
+    return WHITE;
 }
+
+
 
 const main = async () => {
     
@@ -110,30 +154,19 @@ const main = async () => {
         child => String(child.className).startsWith('highlight')
     );
 
-    /*
-        Sort the pieces by their cooridinates such that 
-        we move (a1 -> h8, left to right, bottom to top)
-    */
-    pieces.sort((a, b) => {
-        return String(b.className).slice(-2).split('').reverse().join('') - 
-               String(a.className).slice(-2).split('').reverse().join('');
-    });
+    const board = build_board(pieces);
 
-    const PGN = build_PGN(pieces, last_move_pair);
-
-
-    /* MOVE LATER */
-
-    let msg = new SpeechSynthesisUtterance();
+    const current_turn = get_turn(board, last_move_pair);
+    
+    const PGN = get_pgn(board) + ' ' + current_turn;
 
     document.getElementById('controls-get-pgn').addEventListener('click', async () => {
-        msg.text = await main().then(PGN => PGN);
+        const msg = new SpeechSynthesisUtterance();
+        msg.text = PGN;
         document.getElementById('controls-pgn-result').innerHTML = msg.text;
 
-        window.speechSynthesis.speak(msg);
+        // window.speechSynthesis.speak(msg);
     });
-
-    /* MOVE LATER */
 
     return PGN;
 };
