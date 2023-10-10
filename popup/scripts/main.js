@@ -1,4 +1,6 @@
 (async () => {
+    const msg = new SpeechSynthesisUtterance();
+
     const load_src = chrome.runtime.getURL("/popup/scripts/load_script.js");
     const control_src = chrome.runtime.getURL("/popup/scripts/control_script.js");
     const chess_src = chrome.runtime.getURL("/popup/scripts/chess_script.js");
@@ -12,7 +14,7 @@
     } = await import(control_src);
     
     const { 
-        main
+        create_full_pgn
     } = await import(chess_src);
 
     
@@ -22,15 +24,13 @@
 
     await add_container_movement();
 
-    const msg = new SpeechSynthesisUtterance();
-
     document.getElementById('controls-get-pgn').addEventListener('click', async () => {
         
-        msg.text = await main().then(PGN => PGN);
+        msg.text = await create_full_pgn().then(PGN => PGN);
 
         document.getElementById('controls-pgn-result').innerHTML = msg.text;
 
-        // window.speechSynthesis.speak(msg);
+        window.speechSynthesis.speak(msg);
     });
 
 })();

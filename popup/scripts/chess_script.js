@@ -139,7 +139,7 @@ const get_turn = (board, last_move_pair) => {
 
 
 
-const main = async () => {
+const create_full_pgn = async () => {
     
     const board_element = document.getElementById('board-single') ? 
                           document.getElementById('board-single') : 
@@ -160,33 +160,10 @@ const main = async () => {
     
     const PGN = get_pgn(board) + ' ' + current_turn;
 
-    document.getElementById('controls-get-pgn').addEventListener('click', async () => {
-        const msg = new SpeechSynthesisUtterance();
-        msg.text = PGN;
-        document.getElementById('controls-pgn-result').innerHTML = msg.text;
-
-        // window.speechSynthesis.speak(msg);
-    });
-
     return PGN;
 };
 
 
-
-
-
-
-
-/* 
-    Once the 'download' button appears, the board is no 
-    longer in the default state and we can begin parsing.
-
-    This is a bit of a hack, but it works, and took forever to figure out
-    since the board initially flashes in the default state before loading
-*/
-
-// await_page_load().then(build_controls).then(main);
-
 export {
-    main
+    create_full_pgn
 }
