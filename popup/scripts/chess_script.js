@@ -3,10 +3,36 @@ const WHITE = 'w';
 const BLACK = 'b';
 const EMPTY = '';
 
+const CAPTURE_INDICATOR = 'x';
+
+const CASTLE_INDICATOR = 'o';
+const SHORT_CASTLE = 'oo';
+const LONG_CASTLE = 'ooo';
+
+const PIECE_TYPES = ['p', 'n', 'b', 'r', 'q', 'k'];
+const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
+
+
 class Coordinates {
     constructor (file, rank) {
         this.file = file;
         this.rank = rank;
+    }
+
+    toString() {
+        return `(${this.file}, ${this.rank})`
+    }
+}
+
+
+class Move {
+    constructor (origin, destination) {
+        this.origin = origin;
+        this.destination = destination;
+    }
+
+    toString() {
+        return `${this.origin} -> ${this.destination}`
     }
 }
 
@@ -138,7 +164,6 @@ const get_turn = (board, last_move_pair) => {
 }
 
 
-
 const create_full_pgn = async () => {
     
     const board_element = document.getElementById('board-single') ? 
@@ -164,6 +189,45 @@ const create_full_pgn = async () => {
 };
 
 
+const parse_move = async (move_text) => {
+
+    move_text = move_text.trim().toLowerCase();
+
+    if (move_text.length === 0) { return; }
+    
+    /* Check for castling */
+    if (move_text.slice(0, 1) === CASTLE_INDICATOR) {
+        
+        /* Remove possible dashes */
+        move_text = move_text.split('-').join('');
+
+        if (move_text === SHORT_CASTLE) {
+            return new Move(
+                new Coordinates(5, 1),
+                new Coordinates(7, 1)
+            )
+        }
+
+        if (move_text === LONG_CASTLE) {
+            return new Move(
+                new Coordinates(5, 1),
+                new Coordinates(3, 1)
+            )
+        }
+
+        return;
+    }
+
+
+    /* Continue logic for non-castling moves */
+
+
+    return;
+}
+
+
+
 export {
-    create_full_pgn
+    create_full_pgn,
+    parse_move
 }

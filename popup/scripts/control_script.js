@@ -1,8 +1,8 @@
 
 /* Track the movement of the controls container */
-var isDown = false;
+var mouse_down = false;
 
-var controls_are_down = true;
+var controls_visible = true;
 
 /* Inject the controls container into the page */
 const inject_dashboard = async () => {
@@ -22,23 +22,23 @@ const add_container_movement = () => {
 
     const container_mover = document.getElementById('voice-container-mover');
     const container_minimizer = document.getElementById('voice-container-minimizer');
-    const container_minimizer_text = document.getElementById('minimizer-text');
     const controls_container = document.getElementById('voice-container');
     const voice_controls = document.getElementById('voice-controls');
 
     container_mover.addEventListener('mousedown', () => {
-        isDown = true;
+        mouse_down = true;
     }, true);
 
     document.addEventListener('mouseup', () => {
-        isDown = false;
+        mouse_down = false;
+        container_mover.style.cursor = 'grab';
     }, true);
 
     document.addEventListener('mousemove', (e) => {
         e.preventDefault();
 
         /* Handle moving the controls container */
-        if (isDown) {
+        if (mouse_down) {
             controls_container.style.position = 'fixed';
 
             var deltaX = e.clientX;
@@ -47,31 +47,44 @@ const add_container_movement = () => {
 
             controls_container.style.left = deltaX - rect.width + 16 + 'px';
             controls_container.style.top  = deltaY - 24 + 'px';
+            container_mover.style.cursor = 'grabbing';
         }
 
     }, true);
 
     container_minimizer.addEventListener('click', () => {
-        if (controls_are_down) {
+        if (controls_visible) {
             voice_controls.style.display = 'none';
-            container_minimizer_text.innerHTML = '▼';
-            controls_container.style.width = 'fit-content';
+            container_minimizer.style.transform = 'rotate(180deg)';
             
             
         } else {
             voice_controls.style.display = 'flex';
-            container_minimizer_text.innerHTML = '▲';
-            controls_container.style.width = '50%';
+            container_minimizer.style.transform = 'rotate(0deg)';
         }
 
-        controls_are_down = !controls_are_down;
+        controls_visible = !controls_visible;
     });
 
 
     return controls_container;
 }
 
+const get_move_from_form = async () => {
+
+    const move_input_form = document.getElementById('controls-move-form')
+
+    const move_input = move_input_form.move_value.value;
+
+    /* Empty the input field */
+    move_input_form.move_value.value = '';
+
+
+    return move_input;
+}
+
 export {
     inject_dashboard,
-    add_container_movement
+    add_container_movement,
+    get_move_from_form
 }

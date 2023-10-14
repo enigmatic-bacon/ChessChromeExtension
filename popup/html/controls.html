@@ -1,21 +1,56 @@
 
-<div id="voice-container">
-    <div class="voice-container-controls">
-        <div class="voice-container-mover" id="voice-container-mover">
-            <span id="mover-text">&#8862;</span>
+<div class="voice-container" id="voice-container">
+    <div class="voice-container-header">
+        <div class="voice-container-info">
+            <span>Chess Visual Helper v0.1.0</span>
+
         </div>
-        <div class="voice-container-minimizer" id="voice-container-minimizer">
-            <span id="minimizer-text">▲</span>
+        <div class="voice-container-controls">
+            <!-- 
+                Unfortunately, the best way to render images 
+                given SOP policy, is to hard-code their links in.
+                Alternatively, we could inject them with JS... though
+                I have been unable to get that to work (yet).
+            -->
+            <div 
+                class="voice-container-mover | container-control"
+                id="voice-container-mover"
+            >
+                <img
+                    src="chrome-extension://fgkinmhajcdmmjejdkbeekjniadabbdm/popup/icons/move-icon.png"
+                    class="container-move-icon"
+                >
+            </div>
+            <div 
+                class="voice-container-minimizer | container-control"
+                id="voice-container-minimizer"
+            >
+                <img
+                    src="chrome-extension://fgkinmhajcdmmjejdkbeekjniadabbdm/popup/icons/drop-icon.png"
+                    class="container-drop-icon"
+                >
+            </div>
         </div>
     </div>
+    
     <div class="voice-controls" id="voice-controls">
+        <div class="controls-move-input-wrapper">
+            <form id="controls-move-form" name="move_form">
+                <input 
+                    id="controls-move-input"
+                    class="controls-move-input"
+                    placeholder="Enter Move"
+                    name="move_value"
+                    type="text"
+                    autofocus
+                >
+            </form>
+            
+        </div>
         <div class="controls-get-pgn">
             <button id="controls-get-pgn">Get PGN</button>
             <h4 id='controls-pgn-result'></h4>
         </div>
-        <div class="controls-get-pgn">
-            <button id="controls-get-pgn">Options...</button>
-            <h4 id='controls-pgn-result'></h4>
-        </div>
+        
     </div>
 </div>

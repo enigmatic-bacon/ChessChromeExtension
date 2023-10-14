@@ -29,7 +29,9 @@
         "/popup/scripts/load_script.js",
         "/popup/scripts/chess_script.js",
         "/popup/scripts/control_script.js",
-        "/popup/html/controls.html"
+        "/popup/html/controls.html",
+        "/popup/icons/move-icon.png",
+        "/popup/icons/drop-icon.png"
       ]
     }]
   }
