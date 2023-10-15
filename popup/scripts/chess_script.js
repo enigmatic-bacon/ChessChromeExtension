@@ -15,8 +15,8 @@ const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
 class Coordinates {
     constructor (file, rank) {
-        this.file = file;
-        this.rank = rank;
+        this.file = parseInt(file);
+        this.rank = parseInt(rank);
     }
 
     toString() {
@@ -26,9 +26,10 @@ class Coordinates {
 
 
 class Move {
-    constructor (origin, destination) {
+    constructor (origin, destination, is_capture=false) {
         this.origin = origin;
         this.destination = destination;
+        this.is_capture = is_capture;
     }
 
     toString() {
@@ -79,7 +80,15 @@ class Piece {
     }
 }
 
-const build_board = (pieces) => {
+const build_board = () => {
+
+    const board_element = document.getElementById('board-single') ? 
+                          document.getElementById('board-single') : 
+                          document.getElementById('board-play-computer');
+    
+    const pieces = Array.from(board_element.children).filter(
+        child => String(child.className).startsWith('piece')
+    );
 
     const board = Array(8).fill().map(() => Array(8).fill(''));
 
@@ -92,7 +101,7 @@ const build_board = (pieces) => {
     return board;
 }
 
-const get_pgn = (board) => {
+const get_position_pgn = (board) => {
 
     let PGN = '';
     let whitespace_counter = 0;
@@ -165,57 +174,56 @@ const get_turn = (board, last_move_pair) => {
 
 
 const create_full_pgn = async () => {
-    
-    const board_element = document.getElementById('board-single') ? 
-                          document.getElementById('board-single') : 
-                          document.getElementById('board-play-computer');
-
-    /* Select all pieces on the board */
-    const pieces = Array.from(board_element.children).filter(
-        child => String(child.className).startsWith('piece')
-    );
 
     const last_move_pair = Array.from(board_element.children).filter(
         child => String(child.className).startsWith('highlight')
     );
 
-    const board = build_board(pieces);
+    const board = build_board();
 
     const current_turn = get_turn(board, last_move_pair);
     
-    const PGN = get_pgn(board) + ' ' + current_turn;
+    const PGN = get_position_pgn(board) + ' ' + current_turn;
 
     return PGN;
 };
 
 
+const get_player_color = async () => {
+
+    const board_element = document.getElementById('board-single') ? 
+                          document.getElementById('board-single') : 
+                          document.getElementById('board-play-computer');
+
+    if (board_element.classList.contains("flipped")) {
+        return BLACK;
+    }
+
+    return WHITE;
+}
+
+
 const parse_move = async (move_text) => {
+    const player_color = await get_player_color();
+
+    const board = build_board();
 
     move_text = move_text.trim().toLowerCase();
 
     if (move_text.length === 0) { return; }
     
-    /* Check for castling */
+    /* Check for castling (starts with 'O') */
     if (move_text.slice(0, 1) === CASTLE_INDICATOR) {
         
         /* Remove possible dashes */
         move_text = move_text.split('-').join('');
 
-        if (move_text === SHORT_CASTLE) {
-            return new Move(
-                new Coordinates(5, 1),
-                new Coordinates(7, 1)
-            )
-        }
+        return _create_castle_move(move_text, player_color);
+    }
 
-        if (move_text === LONG_CASTLE) {
-            return new Move(
-                new Coordinates(5, 1),
-                new Coordinates(3, 1)
-            )
-        }
-
-        return;
+    /* Check for pawn move (starts with file) */
+    if (FILES.includes(move_text.slice(0, 1))) {
+        return _create_pawn_move(board, move_text, player_color);
     }
 
 
@@ -225,6 +233,112 @@ const parse_move = async (move_text) => {
     return;
 }
 
+const _create_castle_move = (move_text, player_color) => {
+    if (move_text === SHORT_CASTLE) {
+        if (player_color === WHITE) {
+            return new Move(
+                new Coordinates(5, 1),
+                new Coordinates(7, 1),
+                false
+            )
+        }
+
+        return new Move(
+            new Coordinates(4, 1),
+            new Coordinates(2, 1),
+            false
+        )
+    }
+
+    if (move_text === LONG_CASTLE) {
+        if (player_color === WHITE) {
+            return new Move(
+                new Coordinates(5, 1),
+                new Coordinates(3, 1),
+                false
+            )
+        }
+
+        return new Move(
+            new Coordinates(4, 1),
+            new Coordinates(6, 1),
+            false
+        )
+    }
+
+    return;
+}
+
+const _create_pawn_move = (board, move_text, player_color) => {
+    /* Determine if the pawn is capturing */
+    const is_capture = move_text.slice(1, 2) === CAPTURE_INDICATOR;
+
+    const text_destination = is_capture ? move_text.slice(2) : move_text;
+
+    const destination = _notation_to_coordinates(text_destination);
+
+    if (is_capture) {
+
+        const origin_file = FILES.indexOf(move_text.slice(0, 1)) + 1;
+
+        const origin = new Coordinates(
+            origin_file,
+            player_color === WHITE ? destination.rank - 1 : destination.rank + 1
+        );
+
+        return new Move(origin, destination, true);
+    }
+
+    if ( (player_color === WHITE && destination.rank === 4) ||
+         (player_color === BLACK && destination.rank === 5)) {
+        const origin = _resolve_pawn_double_move(
+            board,
+            destination,
+            player_color
+        );
+
+        return new Move(origin, destination, false);
+    }
+
+    const origin = new Coordinates(
+        destination.file,
+        player_color === WHITE ? destination.rank - 1 : destination.rank + 1
+    );
+
+    return new Move(origin, destination, false);
+}
+
+const _resolve_pawn_double_move = (board, destination, player_color) => {
+
+    if (player_color === WHITE && destination.rank === 4) {
+        if (board[2][destination.file - 1] === EMPTY) {
+            return new Coordinates(destination.file, 2);
+        }
+
+        return new Coordinates(destination.file, 3);
+    }
+
+    if (player_color === BLACK && destination.rank === 5) {
+        if (board[5][destination.file - 1] === EMPTY) {
+            return new Coordinates(destination.file, 7);
+        }
+
+        return new Coordinates(destination.file, 6);
+    }
+
+    return;
+}
+
+const _notation_to_coordinates = (notation) => {
+    
+        const alpha_file = notation.slice(0, 1);
+
+        const file = FILES.indexOf(alpha_file) + 1;
+
+        const rank = notation.slice(1);
+    
+        return new Coordinates(file, rank);
+    }
 
 
 export {
