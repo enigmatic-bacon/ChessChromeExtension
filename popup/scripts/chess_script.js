@@ -9,7 +9,14 @@ const CASTLE_INDICATOR = 'o';
 const SHORT_CASTLE = 'oo';
 const LONG_CASTLE = 'ooo';
 
-const PIECE_TYPES = ['p', 'n', 'b', 'r', 'q', 'k'];
+const KING = 'k';
+const QUEEN = 'q';
+const ROOK = 'r';
+const BISHOP = 'b';
+const KNIGHT = 'n';
+const PAWN = 'p';
+
+const PIECE_TYPES = [KING, QUEEN, ROOK, BISHOP, KNIGHT, PAWN];
 const FILES = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
 
 
@@ -208,9 +215,20 @@ const parse_move = async (move_text) => {
 
     const board = build_board();
 
+    if (move_text.length === 0) { return; }
+
+    /* Mess with the logic a little because 'b' is a valid file,
+       and 'B' is a valid piece type, so if we lowercase the move_text
+       then we can't tell if it's a file or a piece type.
+    */
+    const is_pawn_move = FILES.includes(move_text.slice(0, 1));
+
     move_text = move_text.trim().toLowerCase();
 
-    if (move_text.length === 0) { return; }
+    /* Check for pawn move (starts with file) */
+    if (is_pawn_move) {
+        return _create_pawn_move(board, move_text, player_color);
+    }
     
     /* Check for castling (starts with 'O') */
     if (move_text.slice(0, 1) === CASTLE_INDICATOR) {
@@ -221,17 +239,186 @@ const parse_move = async (move_text) => {
         return _create_castle_move(move_text, player_color);
     }
 
-    /* Check for pawn move (starts with file) */
-    if (FILES.includes(move_text.slice(0, 1))) {
-        return _create_pawn_move(board, move_text, player_color);
+    /* Check for any other piece move */
+    const piece_type = move_text.slice(0, 1);
+
+    const possible_pieces = _find_pieces(board, piece_type, player_color);
+
+    if (possible_pieces.length === 0) { return; }
+
+    const is_capture = move_text.slice(1, 2) === CAPTURE_INDICATOR;
+
+    const text_destination = is_capture ? move_text.slice(2) : move_text.slice(1);
+
+    const destination = _notation_to_coordinates(text_destination);
+
+    let origin;
+
+    possible_pieces.forEach(piece => {
+        if (_piece_can_move_to(board, piece, destination)) {
+            origin = piece.coordinates;
+        }
+    });
+
+    if (origin) {
+        return new Move(origin, destination, is_capture);
     }
-
-
-    /* Continue logic for non-castling moves */
-
-
+    
     return;
 }
+
+const _find_pieces = (board, piece_type, player_color) => {
+    const results = [];
+
+    board.forEach( row => {
+        row.forEach( piece => {
+
+            if (piece == EMPTY) { return; }
+
+            if (piece.type.toLowerCase() === piece_type && piece.color === player_color) {
+                results.push(piece);
+            }
+        });
+    });
+
+    return results;
+}
+
+const _piece_can_move_to = (board, piece, destination) => {
+
+    if (piece.type.toLowerCase() === KING) {
+        return _king_can_move_to(board, piece, destination);
+    } else if (piece.type.toLowerCase() === QUEEN) {
+        return _queen_can_move_to(board, piece, destination);
+    } else if (piece.type.toLowerCase() === ROOK) {
+        return _rook_can_move_to(board, piece, destination);
+    } else if (piece.type.toLowerCase() === BISHOP) {
+        return _bishop_can_move_to(board, piece, destination);
+    } else if (piece.type.toLowerCase() === KNIGHT) {
+        return _knight_can_move_to(board, piece, destination);
+    }
+
+    return false;
+}
+
+const _king_can_move_to = (board, piece, destination) => {
+    
+    const origin = piece.coordinates;
+
+    if (Math.abs(origin.file - destination.file) > 1) {
+        return false;
+    }
+
+    if (Math.abs(origin.rank - destination.rank) > 1) {
+        return false;
+    }
+
+    return true;
+}
+
+const _queen_can_move_to = (board, piece, destination) => {
+    const origin = piece.coordinates;
+
+    if (origin.file === destination.file) {
+        return _rook_can_move_to(board, piece, destination);
+    }
+
+    if (origin.rank === destination.rank) {
+        return _rook_can_move_to(board, piece, destination);
+    }
+
+    return _bishop_can_move_to(board, piece, destination);
+}
+
+const _rook_can_move_to = (board, piece, destination) => {
+    const origin = piece.coordinates;
+
+    if (origin.file === destination.file) {
+        const min = Math.min(origin.rank - 1, destination.rank - 1);
+        const max = Math.max(origin.rank - 1, destination.rank - 1);
+
+        for(let i = min + 1; i < max; i++) {
+            if (board[i][origin.file - 1] !== EMPTY) {
+                return false;
+            }
+        }
+
+        /* Check if destination is not occupied by a piece of the same color */
+        if (board[destination.rank - 1][destination.file - 1] === EMPTY) {
+            return true;
+        }
+
+        if (board[destination.rank - 1][destination.file - 1].color !== piece.color) {
+            return true;
+        }
+    }
+
+    if (origin.rank === destination.rank) {
+        const min = Math.min(origin.file - 1, destination.file - 1);
+        const max = Math.max(origin.file - 1, destination.file - 1);
+
+        for(let i = min + 1; i < max; i++) {
+            if (board[origin.rank - 1][i] !== EMPTY) {
+                return false;
+            }
+        }
+
+        /* Check if destination is not occupied by a piece of the same color */
+        if (board[destination.rank - 1][destination.file - 1] === EMPTY) {
+            return true;
+        }
+
+        if (board[destination.rank - 1][destination.file - 1].color !== piece.color) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+const _bishop_can_move_to = (board, piece, destination) => {
+    const origin = piece.coordinates;
+
+    if (Math.abs(origin.file - destination.file) !== 
+        Math.abs(origin.rank - destination.rank)) {
+        return false;
+    }
+
+    const file_direction = origin.file < destination.file ? 1 : -1;
+    const rank_direction = origin.rank < destination.rank ? 1 : -1;
+
+    let file = origin.file;
+    let rank = origin.rank;
+
+    while (file !== destination.file && rank !== destination.rank) {
+        file += file_direction;
+        rank += rank_direction;
+
+        if (board[rank - 1][file - 1] !== EMPTY) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+const _knight_can_move_to = (board, piece, destination) => {
+    const origin = piece.coordinates;
+
+    const file_diff = Math.abs(origin.file - destination.file);
+    const rank_diff = Math.abs(origin.rank - destination.rank);
+
+    if (file_diff === 2 && rank_diff === 1) {
+        return true;
+    }
+
+    if (file_diff === 1 && rank_diff === 2) {
+        return true;
+    }
+
+    return false;
+}
+
 
 const _create_castle_move = (move_text, player_color) => {
     if (move_text === SHORT_CASTLE) {
