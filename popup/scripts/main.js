@@ -17,7 +17,8 @@
     
     const { 
         create_full_pgn,
-        parse_move
+        parse_move,
+        make_move
     } = await import(chess_src);
 
     await await_page_load();
@@ -31,7 +32,7 @@
 
         const parsed_move = await parse_move(raw_move_text);
 
-        console.log(parsed_move)
+        make_move(parsed_move);
     });
 
     document.getElementById('controls-get-pgn').addEventListener('click', async () => {

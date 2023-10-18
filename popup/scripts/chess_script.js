@@ -80,6 +80,8 @@ class Piece {
             // Should already be lowercase, but just in case
             this.type = this.type.toLowerCase();
         }
+
+        this.htmlElement = htmlElement;
     }
 
     toString() {
@@ -182,6 +184,10 @@ const get_turn = (board, last_move_pair) => {
 
 const create_full_pgn = async () => {
 
+    const board_element = document.getElementById('board-single') ?
+                          document.getElementById('board-single') :
+                          document.getElementById('board-play-computer');
+
     const last_move_pair = Array.from(board_element.children).filter(
         child => String(child.className).startsWith('highlight')
     );
@@ -266,6 +272,37 @@ const parse_move = async (move_text) => {
     
     return;
 }
+
+const make_move = (move) => {
+
+    const board_element = document.getElementById('board-single') ? 
+                          document.getElementById('board-single') : 
+                          document.getElementById('board-play-computer');
+
+    const board_square = board_element.querySelector(`.square-${move.origin.file}${move.origin.rank}`);
+
+    const squareWidth = board_square.getBoundingClientRect().width;
+    const offsetX = board_element.getBoundingClientRect().x;
+    const offsetY = board_element.getBoundingClientRect().y;
+    const bubbles = true;
+
+    // mouse down on the center of the e2 square
+    let clientX = squareWidth * (move.origin.file - 0.5) + offsetX;
+    let clientY = squareWidth * (8 - move.origin.rank + 0.5) + offsetY;
+    let event = new PointerEvent('pointerdown', { clientX, clientY, bubbles });
+    
+    board_element.dispatchEvent(event);
+
+    // mouseup on the center of the e3 square
+    clientX = squareWidth * (move.destination.file - 0.5) + offsetX;
+    clientY = squareWidth * (8 - move.destination.rank + 0.5) + offsetY;
+    
+    console.log((move.origin.file - 0.5), (8 - move.origin.rank + 0.5))
+
+    event = new PointerEvent('pointerup', { clientX, clientY, bubbles });
+    board_element.dispatchEvent(event);
+}
+
 
 const _find_pieces = (board, piece_type, player_color) => {
     const results = [];
@@ -379,27 +416,32 @@ const _rook_can_move_to = (board, piece, destination) => {
 const _bishop_can_move_to = (board, piece, destination) => {
     const origin = piece.coordinates;
 
-    if (Math.abs(origin.file - destination.file) !== 
-        Math.abs(origin.rank - destination.rank)) {
+    const file_diff = Math.abs(origin.file - destination.file);
+    const rank_diff = Math.abs(origin.rank - destination.rank);
+
+    if (file_diff !== rank_diff) {
         return false;
     }
 
     const file_direction = origin.file < destination.file ? 1 : -1;
     const rank_direction = origin.rank < destination.rank ? 1 : -1;
 
-    let file = origin.file;
-    let rank = origin.rank;
-
-    while (file !== destination.file && rank !== destination.rank) {
-        file += file_direction;
-        rank += rank_direction;
-
-        if (board[rank - 1][file - 1] !== EMPTY) {
+    for(let i = 1; i < file_diff; i++) {
+        if (board[origin.rank - 1 + i * rank_direction][origin.file - 1 + i * file_direction] !== EMPTY) {
             return false;
         }
     }
 
-    return true;
+    /* Check if destination is not occupied by a piece of the same color */
+    if (board[destination.rank - 1][destination.file - 1] === EMPTY) {
+        return true;
+    }
+
+    if (board[destination.rank - 1][destination.file - 1].color !== piece.color) {
+        return true;
+    }
+
+    return false;
 }
 
 const _knight_can_move_to = (board, piece, destination) => {
@@ -575,45 +617,6 @@ const _create_castle_move = (move_text, player_color) => {
     return;
 }
 
-// const _create_pawn_move = (board, move_text, player_color) => {
-//     /* Determine if the pawn is capturing */
-//     const is_capture = move_text.slice(1, 2) === CAPTURE_INDICATOR;
-
-//     const text_destination = is_capture ? move_text.slice(2) : move_text;
-
-//     const destination = _notation_to_coordinates(text_destination);
-
-//     if (is_capture) {
-
-//         const origin_file = FILES.indexOf(move_text.slice(0, 1)) + 1;
-
-//         const origin = new Coordinates(
-//             origin_file,
-//             player_color === WHITE ? destination.rank - 1 : destination.rank + 1
-//         );
-
-//         return new Move(origin, destination, true);
-//     }
-
-//     if ( (player_color === WHITE && destination.rank === 4) ||
-//          (player_color === BLACK && destination.rank === 5)) {
-//         const origin = _resolve_pawn_double_move(
-//             board,
-//             destination,
-//             player_color
-//         );
-
-//         return new Move(origin, destination, false);
-//     }
-
-//     const origin = new Coordinates(
-//         destination.file,
-//         player_color === WHITE ? destination.rank - 1 : destination.rank + 1
-//     );
-
-//     return new Move(origin, destination, false);
-// }
-
 const _resolve_pawn_double_move = (board, destination, player_color) => {
 
     if (player_color === WHITE && destination.rank === 4) {
@@ -650,8 +653,50 @@ const _file_to_number = (file) => {
     return FILES.indexOf(file) + 1;
 }
 
+/* 
+    Courtesy of:
+        https://stackoverflow.com/questions/3277369/how-to-simulate-a-click-by-using-x-y-coordinates-in-javascript
+*/
+const _click_pixel = (x, y) => {
+    var ev = new MouseEvent('click', {
+        'view': window,
+        'bubbles': true,
+        'cancelable': true,
+        'screenX': x,
+        'screenY': y
+    });
+
+    var el = document.elementFromPoint(x, y);
+
+    // Add a square to where the click was made
+    el.classList.add('square-clicked');
+
+    el.dispatchEvent(ev);
+}
+
+/*
+    var rect = document.getElementById('board-play-computer').getBoundingClientRect();
+    console.log(rect.top, rect.right, rect.bottom, rect.left);
+*/
+
+
+/*
+function getOffset( el ) {
+    var _x = 0;
+    var _y = 0;
+    while( el && !isNaN( el.offsetLeft ) && !isNaN( el.offsetTop ) ) {
+        _x += el.offsetLeft - el.scrollLeft;
+        _y += el.offsetTop - el.scrollTop;
+        el = el.offsetParent;
+    }
+    return { top: _y, left: _x };
+}
+
+*/
+
 
 export {
     create_full_pgn,
-    parse_move
+    parse_move,
+    make_move
 }
