@@ -15,6 +15,10 @@ const inject_dashboard = async () => {
     container.innerHTML = container_html.trim();
 
     document.getElementById('board-layout-main').appendChild(container.firstChild);
+
+    document.getElementById('voice-container-mover').children[0].src = chrome.runtime.getURL('/popup/icons/move-icon.png');
+    document.getElementById('voice-container-minimizer').children[0].src = chrome.runtime.getURL('/popup/icons/drop-icon.png');
+
 }
 
 /* Add movement to the controls container */
