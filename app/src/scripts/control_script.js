@@ -7,8 +7,9 @@ var controls_visible = true;
 /* Inject the controls container into the page */
 const inject_dashboard = async () => {
 
+    /* Still can access chrome runtime */
     const controls_url = chrome.runtime.getURL('/html/controls.html');
-    
+
     const container_html = await (await fetch(controls_url)).text();
 
     const container = document.createElement('div');
