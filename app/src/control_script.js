@@ -7,7 +7,7 @@ var controls_visible = true;
 /* Inject the controls container into the page */
 const inject_dashboard = async () => {
 
-    const controls_url = chrome.runtime.getURL('/popup/html/controls.html');
+    const controls_url = chrome.runtime.getURL('/html/controls.html');
     const container_html = await (await fetch(controls_url)).text();
 
     const container = document.createElement('div');
@@ -16,8 +16,8 @@ const inject_dashboard = async () => {
 
     document.getElementById('board-layout-main').appendChild(container.firstChild);
 
-    document.getElementById('voice-container-mover').children[0].src = chrome.runtime.getURL('/popup/icons/move-icon.png');
-    document.getElementById('voice-container-minimizer').children[0].src = chrome.runtime.getURL('/popup/icons/drop-icon.png');
+    document.getElementById('voice-container-mover').children[0].src = chrome.runtime.getURL('/icons/move-icon.png');
+    document.getElementById('voice-container-minimizer').children[0].src = chrome.runtime.getURL('/icons/drop-icon.png');
 
 }
 

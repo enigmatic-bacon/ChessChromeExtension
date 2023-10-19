@@ -20,18 +20,16 @@
     },
     "content_scripts": [{
       "matches": ["https://www.chess.com/play/computer/*", "https://www.chess.com/game/live/*"],
-      "js": ["/popup/scripts/main.js"],
-      "css": ["/popup/css/controls.css"]
+      "js": ["inject.js"],
+      "css": ["./styles/controls.css"]
     }],
     "web_accessible_resources": [{
       "matches": ["<all_urls>"],
       "resources": [
-        "/popup/scripts/load_script.js",
-        "/popup/scripts/chess_script.js",
-        "/popup/scripts/control_script.js",
-        "/popup/html/controls.html",
-        "/popup/icons/move-icon.png",
-        "/popup/icons/drop-icon.png"
+        "/dist/bundle.js",
+        "/html/controls.html",
+        "/icons/move-icon.png",
+        "/icons/drop-icon.png"
       ]
     }]
   }
