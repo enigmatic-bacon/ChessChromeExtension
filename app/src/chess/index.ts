@@ -20,7 +20,7 @@ export class Coordinate implements ICoordinate {
     }
 
     toString (): string {
-        return `${String.fromCharCode(this.file + 97)}${this.rank + 1}`;
+        return `(${this.rank}, ${this.file})`;
     }
 }
 
@@ -45,9 +45,13 @@ export class Piece implements IPiece {
 
             if (className.startsWith('square')) {
                 const pos_info: string = className.split('-')[1];
+
+                console.log(pos_info);
             
-                const file: number = file_to_index(pos_info.slice(0, 1));
-                const rank = parseInt(pos_info.slice(1)) - 1;
+                const file: number = parseInt(pos_info.slice(0, 1)) - 1;
+                const rank: number = parseInt(pos_info.slice(1)) - 1;
+
+                console.log(file, rank);
 
                 this.location = new Coordinate(rank, file);
 

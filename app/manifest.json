@@ -20,13 +20,12 @@
     },
     "content_scripts": [{
       "matches": ["https://www.chess.com/play/computer/*", "https://www.chess.com/game/live/*"],
-      "js": ["inject.js"],
+      "js": ["/dist/bundle.js"],
       "css": ["./styles/controls.css"]
     }],
     "web_accessible_resources": [{
       "matches": ["<all_urls>"],
       "resources": [
-        "/dist/bundle.js",
         "/html/controls.html",
         "/icons/move-icon.png",
         "/icons/drop-icon.png"

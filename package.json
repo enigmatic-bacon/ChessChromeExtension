@@ -1,7 +1,8 @@
 {
     "name": "chessextension",
     "scripts": {
-        "build": "npx webpack"
+        "build": "npx webpack",
+        "watch": "npx webpack --watch"
     },
     "devDependencies": {
         "@types/chrome": "^0.0.248",

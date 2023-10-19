@@ -1,9 +1,18 @@
 'use strict';
     
 import { Piece } from './chess/index';
+import { await_page_load } from './scripts/load_script';
+import { inject_dashboard } from './scripts/control_script';
 
-const king = document.getElementsByClassName('wk')[0]
+const main = async () => {
 
-const piece = new Piece(king);
+    await inject_dashboard();
 
-console.log(piece);
+    const king = document.getElementsByClassName('wk')[0]
+    const piece = new Piece(king);
+    console.log(piece);
+
+    
+};
+
+await_page_load().then(main);
