@@ -1,4 +1,4 @@
-# YoutubeExtension
+# Chess Visual Helper
 
 To get this set up on your machine, follow these steps:
 1. Download or open [Chrome](https://www.google.com/chrome/). <br>The extension has been migrated to Chrome due to the larger amount of resources available, as well as the higher number of users.
