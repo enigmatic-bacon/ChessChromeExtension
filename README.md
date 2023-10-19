@@ -9,14 +9,16 @@ To get this set up on your machine, follow these steps:
 
 3. Open a terminal to the downloaded folder, and run `npm i`. This should install all dev-dependencies.
 
-4. In Chrome, enter `chrome://extensions` into the URL bar.
+4. Run `npm run build` (or `npm run watch` if actively developing) to build the JS Webpack Bundle.
 
-5. Enable `Developer Mode` in the top right corner of the extensions page.
+5. In Chrome, enter `chrome://extensions` into the URL bar.
 
-6. On the top left, click on `Load unpacked` and select the folder that <b>contains</b> the `manifest.json` file.
+6. Enable `Developer Mode` in the top right corner of the extensions page.
 
-7. Click on the puzzle piece on the top right of the browser and select the `pin` icon beside the Chess Visual Helper extension.
+7. On the top left, click on `Load unpacked` and select the folder that <b>contains</b> the `manifest.json` file.
 
-8. Navigate to Chess.com, sign in, and navigate to either a real (or computer) game. The extension should load in an interface beneath your name.
+8. Click on the puzzle piece on the top right of the browser and select the `pin` icon beside the Chess Visual Helper extension.
 
-9. Have fun!
+9. Navigate to Chess.com, sign in, and navigate to either a real (or computer) game. The extension should load in an interface beneath your name.
+
+10. Have fun!
