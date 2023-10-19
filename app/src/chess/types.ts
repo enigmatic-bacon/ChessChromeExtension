@@ -1,4 +1,6 @@
 
+type Nullable<T> = T | null;
+
 export enum ColorType {
     White = 'w',
     Black = 'b'
@@ -12,6 +14,8 @@ export enum PieceType {
     Queen = 'q',
     King = 'k'
 }
+
+export interface ICoordinateFactory { }
 
 export interface ICoordinate {
     rank: number;
@@ -31,10 +35,11 @@ export interface IPiece {
 
 export interface ISquare {
     location: ICoordinate;
-    piece: IPiece;
+    piece: Nullable<IPiece>;
 }
 
 export interface IChessBoard {
+    board_element: HTMLElement;
     board: ISquare[][];
     turn: ColorType;
     pieces: IPiece[];

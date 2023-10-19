@@ -5,7 +5,7 @@ var mouse_down = false;
 var controls_visible = true;
 
 /* Inject the controls container into the page */
-const inject_dashboard = async (): Promise<void> => {
+const inject_board_html = async (): Promise<void> => {
 
     /* Hacky way of getting the controls container HTML (ty Chrome). */
     const container_html: string = await (
@@ -28,59 +28,24 @@ const inject_dashboard = async (): Promise<void> => {
 
     (container_mover as HTMLImageElement).src = chrome.runtime.getURL('/icons/move-icon.png');
     (container_minimizer as HTMLImageElement).src = chrome.runtime.getURL('/icons/drop-icon.png');
+
+    /* Remove the sidebar ad, why not? */
+    document.getElementById('sidebar-ad').remove();
 }
 
 /* Add movement to the controls container */
-const add_container_movement = () => {
+const add_container_movement = (): Promise<void> => {
 
     const container_mover: HTMLElement = document.getElementById('voice-container-mover');
     const container_minimizer: HTMLElement = document.getElementById('voice-container-minimizer');
-    const controls_container: HTMLElement = document.getElementById('voice-container');
-    const voice_controls: HTMLElement = document.getElementById('voice-controls');
 
-    container_mover.addEventListener('mousedown', () => {
-        mouse_down = true;
-    }, true);
+    _initialize_mover_functions(container_mover);
+    _initialize_minimizer_functions(container_minimizer);
 
-    document.addEventListener('mouseup', () => {
-        mouse_down = false;
-        container_mover.style.cursor = 'grab';
-    }, true);
-
-    document.addEventListener('mousemove', (e) => {
-        e.preventDefault();
-
-        /* Handle moving the controls container */
-        if (mouse_down) {
-            controls_container.style.position = 'fixed';
-
-            var deltaX: number = e.clientX;
-            var deltaY: number = e.clientY;
-            var rect: DOMRect = controls_container.getBoundingClientRect();
-
-            controls_container.style.left = deltaX - rect.width + 16 + 'px';
-            controls_container.style.top  = deltaY - 24 + 'px';
-            container_mover.style.cursor = 'grabbing';
-        }
-
-    }, true);
-
-    container_minimizer.addEventListener('click', () => {
-        if (controls_visible) {
-            container_minimizer.style.transform = 'rotate(180deg)';
-        } else {
-            container_minimizer.style.transform = 'rotate(0deg)';
-        }
-
-        voice_controls.classList.toggle('closed-controls');
-        controls_visible = !controls_visible;
-    });
-
-
-    return controls_container;
+    return;
 }
 
-const get_move_from_form = async () => {
+const get_move_from_form = (): string => {
 
     const move_input_form: HTMLElement = document.getElementById('controls-move-input')
 
@@ -92,8 +57,68 @@ const get_move_from_form = async () => {
     return move_input;
 }
 
+const inject_dashboard = async (): Promise<void> => {
+    await inject_board_html();
+
+    add_container_movement();
+
+    return;
+}
+
+const _initialize_mover_functions = (mover: HTMLElement): void => {
+
+    const controls_container: HTMLElement = document.getElementById('voice-container');
+
+    mover.addEventListener('mousedown', () => {
+        mouse_down = true;
+    }, true);
+
+    document.addEventListener('mouseup', () => {
+        mouse_down = false;
+        mover.style.cursor = 'grab';
+    }, true);
+
+    document.addEventListener('mousemove', (e) => {
+        e.preventDefault();
+
+        /* Handle moving the controls container */
+        if (mouse_down) {
+            controls_container.style.position = 'fixed';
+
+            var deltaX: number = e.clientX;
+            var deltaY: number = e.clientY;
+            
+            var rect: DOMRect = controls_container.getBoundingClientRect();
+
+            controls_container.style.left = deltaX - rect.width + 16 + 'px';
+            controls_container.style.top  = deltaY - 24 + 'px';
+            mover.style.cursor = 'grabbing';
+        }
+
+    }, true);
+
+    return;
+}
+
+const _initialize_minimizer_functions = (minimizer: HTMLElement): void => {
+
+    const voice_controls: HTMLElement = document.getElementById('voice-controls');
+
+    minimizer.addEventListener('click', () => {
+        if (controls_visible) {
+            minimizer.style.transform = 'rotate(180deg)';
+        } else {
+            minimizer.style.transform = 'rotate(0deg)';
+        }
+
+        voice_controls.classList.toggle('closed-controls');
+        controls_visible = !controls_visible;
+    });
+
+    return;
+}
+
 export {
     inject_dashboard,
-    add_container_movement,
     get_move_from_form
 }
