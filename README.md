@@ -5,14 +5,18 @@ To get this set up on your machine, follow these steps:
 
 1. Download this codebase onto your device with:<br> `git clone https://github.com/enigmatic-bacon/YoutubeExtension.git` or similar.
 
-3. In Chrome, enter `chrome://extensions` into the URL bar.
+2. Ensure that you have a functional version of npm `npm --version` [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
 
-4. Enable `Developer Mode` in the top right corner of the extensions page.
+3. Open a terminal to the downloaded folder, and run `npm i`. This should install all dev-dependencies.
 
-5. On the top left, click on `Load unpacked` and select the folder that <b>contains</b> the `manifest.json` file.
+4. In Chrome, enter `chrome://extensions` into the URL bar.
 
-6. Click on the puzzle piece on the top right of the browser and select the `pin` icon beside the Chess Visual Helper extension.
+5. Enable `Developer Mode` in the top right corner of the extensions page.
 
-7. Navigate to Chess.com, sign in, and navigate to either a real (or computer) game. The extension should load in an interface beneath your name.
+6. On the top left, click on `Load unpacked` and select the folder that <b>contains</b> the `manifest.json` file.
 
-8. Have fun!
+7. Click on the puzzle piece on the top right of the browser and select the `pin` icon beside the Chess Visual Helper extension.
+
+8. Navigate to Chess.com, sign in, and navigate to either a real (or computer) game. The extension should load in an interface beneath your name.
+
+9. Have fun!
