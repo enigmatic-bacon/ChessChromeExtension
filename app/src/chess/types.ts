@@ -17,6 +17,8 @@ export enum PieceType {
 
 export interface ICoordinateFactory { }
 
+export interface IMoveFactory { }
+
 export interface ICoordinate {
     rank: number;
     file: number;
@@ -42,6 +44,7 @@ export interface IChessBoard {
     board_element: HTMLElement;
     board: ISquare[][];
     turn: ColorType;
+    player_color: ColorType;
     pieces: IPiece[];
 
     make_move(move: IMove): void;

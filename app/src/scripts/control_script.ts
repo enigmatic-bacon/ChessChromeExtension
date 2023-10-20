@@ -1,7 +1,6 @@
 
 /* Track the movement of the controls container */
 var mouse_down = false;
-
 var controls_visible = true;
 
 /* Inject the controls container into the page */
@@ -90,8 +89,8 @@ const _initialize_mover_functions = (mover: HTMLElement): void => {
             
             var rect: DOMRect = controls_container.getBoundingClientRect();
 
-            controls_container.style.left = deltaX - rect.width + 16 + 'px';
-            controls_container.style.top  = deltaY - 24 + 'px';
+            controls_container.style.left = deltaX - rect.width + 20 + 'px';
+            controls_container.style.top  = deltaY - 32 + 'px';
             mover.style.cursor = 'grabbing';
         }
 
