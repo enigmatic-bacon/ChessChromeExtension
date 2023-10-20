@@ -38,6 +38,8 @@ export interface IPiece {
 export interface ISquare {
     location: ICoordinate;
     piece: Nullable<IPiece>;
+
+    is_empty(): boolean;
 }
 
 export interface IChessBoard {

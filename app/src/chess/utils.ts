@@ -14,3 +14,9 @@ export const find_pieces = (pieces: Piece[], color: ColorType, type: PieceType):
         return piece.color === color && piece.type === type;
     });
 }
+
+export const remove_piece = (pieces: Piece[], piece: Piece): Piece[] => {
+    return pieces.filter((p: Piece) => {
+        return p.location.rank !== piece.location.rank || p.location.file !== piece.location.file;
+    });
+}
