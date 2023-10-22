@@ -137,6 +137,10 @@ export class Move implements IMove {
         this.to = to;
     }
 
+    public to_speech (): string {
+        return `${this.to.to_speech()}`;
+    }
+
     equals (move: Move): boolean {
         return this.from.rank === move.from.rank &&
                this.from.file === move.from.file &&

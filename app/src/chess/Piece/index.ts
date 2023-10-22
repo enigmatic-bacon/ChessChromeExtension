@@ -10,7 +10,9 @@ import {
     CoordinateFactory
 } from '../Coordinate/index';
 
-
+import {
+    piece_type_to_name
+} from './utils';
 export class Piece implements IPiece {
     location: Coordinate;
     color: ColorType;
@@ -28,6 +30,10 @@ export class Piece implements IPiece {
                 this.color = className.slice(0, 1) as ColorType;
             }
         });
+    }
+
+    public to_speech (): string {
+        return `${piece_type_to_name(this.type)}`;
     }
 
     equals (piece: Piece): boolean {

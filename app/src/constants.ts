@@ -30,3 +30,11 @@ export class ErrorHelper {
         throw new Error(`${error}: ${message}`);
     }
 }
+
+export class MoveSpeaker {
+    static speak_message(message: string): void {
+        const msg = new SpeechSynthesisUtterance(message);
+        msg.lang = 'en-US';
+        window.speechSynthesis.speak(msg);
+    }
+}

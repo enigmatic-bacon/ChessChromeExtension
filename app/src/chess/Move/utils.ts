@@ -12,3 +12,4 @@ export const find_pieces = (pieces: Piece[], color: ColorType, type: PieceType):
         return piece.color === color && piece.type === type;
     });
 }
+

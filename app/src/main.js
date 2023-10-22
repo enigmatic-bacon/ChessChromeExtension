@@ -17,13 +17,13 @@ import {
     get_move_from_form
 } from './scripts/control_script';
 
+const speak_flag = true;
+
 const main = async () => {
 
     await inject_dashboard();
 
-    const board = new ChessBoard();
-
-    console.log(board);
+    const board = new ChessBoard(speak_flag);
 
     document.getElementById('controls-move-form').addEventListener('submit', e => {
         e.preventDefault();
@@ -36,7 +36,6 @@ const main = async () => {
             parsed_move = MoveFactory.build_from_string(board, move_text, board.player_color);
         } catch (err) {
             console.log(err.message);
-            console.log(board);
             return;
         }
 

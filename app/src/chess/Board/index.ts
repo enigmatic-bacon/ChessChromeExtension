@@ -1,5 +1,6 @@
 import {
     Constants,
+    MoveSpeaker
 } from '../../constants';
 
 import {
@@ -37,13 +38,18 @@ export class ChessBoard implements IChessBoard {
     player_color: ColorType;
     pieces: Piece[];
 
-    constructor() {
+    speak_moves: boolean;
+
+    constructor(speak_moves=false) {
+
         this.board_element = document.getElementById('board-single') ? 
                              document.getElementById('board-single') : 
                              document.getElementById('board-play-computer');
 
         this.player_color = this.board_element.classList.contains('flipped') ?
                             ColorType.Black : ColorType.White;
+
+        this.speak_moves = speak_moves;
         
         this._initialize_pieces_and_board();
 
@@ -140,6 +146,15 @@ export class ChessBoard implements IChessBoard {
          */
         this._initialize_pieces_and_board();
 
+        /*
+         * TODO: FIXME
+         *
+         * We don't need to re-initialize the turn
+         * but this is a quick solution to relay
+         * the move to the user.
+         */
+        this._initialize_turn();
+
         return;
     }
 
@@ -222,9 +237,15 @@ export class ChessBoard implements IChessBoard {
                 const coord: Coordinate = CoordinateFactory.build_from_class(className);
 
                 if (this.board[coord.rank][coord.file].piece) {
+                    const moved_piece = this.board[coord.rank][coord.file].piece;
+
                     this.turn = invert_color(
-                        this.board[coord.rank][coord.file].piece.color
+                        moved_piece.color
                     );
+
+                    console.log("here");
+
+                    MoveSpeaker.speak_message(moved_piece.to_speech() + ' to ' + coord.to_speech());
                 }
             });
         });

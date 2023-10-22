@@ -51,6 +51,10 @@ export class Coordinate implements ICoordinate {
         this.file = file;
     }
 
+    public to_speech (): string {
+        return `${Constants.FILES[this.file]}${this.rank + 1}`;
+    }
+
     toString (): string {
         return `(${this.file}, ${this.rank})`;
     }
