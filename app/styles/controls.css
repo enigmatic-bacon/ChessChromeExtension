@@ -46,6 +46,7 @@
 
 .voice-container-minimizer {
     transition: 0.3s ease-in-out all;
+    transform: rotate(180deg);
 }
 
 .container-control > img {

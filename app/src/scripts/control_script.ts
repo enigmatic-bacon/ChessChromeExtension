@@ -57,6 +57,7 @@ const get_move_from_form = (): string => {
 }
 
 const inject_dashboard = async (): Promise<void> => {
+
     await inject_board_html();
 
     add_container_movement();
@@ -105,9 +106,9 @@ const _initialize_minimizer_functions = (minimizer: HTMLElement): void => {
 
     minimizer.addEventListener('click', () => {
         if (controls_visible) {
-            minimizer.style.transform = 'rotate(180deg)';
-        } else {
             minimizer.style.transform = 'rotate(0deg)';
+        } else {
+            minimizer.style.transform = 'rotate(180deg)';
         }
 
         voice_controls.classList.toggle('closed-controls');
