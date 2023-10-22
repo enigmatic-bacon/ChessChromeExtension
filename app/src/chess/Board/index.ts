@@ -1,6 +1,7 @@
 import {
     Constants,
-    MoveSpeaker
+    MoveSpeaker,
+    ErrorHelper
 } from '../../constants';
 
 import {
@@ -39,6 +40,8 @@ export class ChessBoard implements IChessBoard {
     pieces: Piece[];
 
     speak_moves: boolean;
+
+    private _attempted_move: boolean = false;
 
     constructor(speak_moves: boolean = false) {
 
@@ -95,7 +98,7 @@ export class ChessBoard implements IChessBoard {
      * 
      * @param move: Move (Move to make)
      */
-    public make_move(move: Move): void {
+    public async make_move(move: Move): Promise<void> {
 
         const square_element: HTMLElement = this.board_element.querySelector(
             `.square-${move.from.file + 1}${move.from.rank + 1}`
@@ -121,6 +124,20 @@ export class ChessBoard implements IChessBoard {
 
         this.board_element.dispatchEvent(event);
 
+        this._attempted_move = true;
+
+        await new Promise(
+            resolve => setTimeout(
+                resolve, Constants.OBSERVER_INTERVAL
+            )
+        );
+
+        if (this._attempted_move) {
+            MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' + ErrorHelper.INVALID_MOVE);
+            ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
+            return;
+        }
+
         return;
     }
 
@@ -136,6 +153,7 @@ export class ChessBoard implements IChessBoard {
      * also not a huge deal.
      */
     private _update_board_after_move(): void {
+        this._attempted_move = false;
 
         /* 
          * Somebody smarter than me can figure out

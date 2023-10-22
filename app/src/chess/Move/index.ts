@@ -1,6 +1,7 @@
 import {
     Constants,
-    ErrorHelper
+    ErrorHelper,
+    MoveSpeaker
 } from '../../constants';
 
 import {
@@ -29,6 +30,21 @@ import {
 export class MoveFactory implements IMoveFactory {
     /*
      * Given a user move string, return a Move object.
+     * 
+     *        Examples:
+     *          - 'e4' -> Pawn either e2 or e3 to e4
+     *          - 'Nf3' -> Knight to f3
+     *          - 'Nxf3' -> Knight to f3, capturing
+     *          - 'Rdd3' -> Rook on d-file to f3
+     *          - 'R1f3' -> Rook on first rank to f3
+     *          - 'R1xf3' -> Rook on first rank to f3, capturing
+     *          - 'O-O' -> King side castle (OO, oo)
+     *          - 'O-O-O' -> Queen side castle
+     *          - 'e8=Q' -> Pawn on e-file to e8, promoting to queen
+     *          - 'Qd3xf3' -> Queen on d3 to f3, capturing
+     *          - 'Be2+' -> Bishop on e2 to e3, checking
+     *          - 'Bxe2+' -> Bishop on e2 to e3, capturing and checking
+     *          - 'Bxe2#' -> Bishop on e2 to e3, capturing and checkmate
      * 
      * @param {ChessBoard} board - The current board state.
      * @param {string} move - The user's move string.
@@ -86,6 +102,7 @@ export class MoveFactory implements IMoveFactory {
                  * is ambiguous.
                  */
                 if (move_piece) {
+                    MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.AMBIGUOUS_MOVE);
                     ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.AMBIGUOUS_MOVE);
                 }
 
@@ -180,7 +197,18 @@ export class MoveFactory implements IMoveFactory {
      * @returns {Move} - The move object.
      */
     private static _create_castle_move(board: ChessBoard, castle_text: string): Move {
-        return;
+        castle_text = castle_text.split('-').join('');
+        
+        if (castle_text.length === 3) {
+            return MoveFactory.build_from_coords(
+                new Coordinate(0, 4),
+                new Coordinate(0, 2)
+            )
+        }
+        return MoveFactory.build_from_coords(
+            new Coordinate(0, 4),
+            new Coordinate(0, 6)
+        )
     }
 }
 

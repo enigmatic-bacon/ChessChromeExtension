@@ -6,6 +6,7 @@ export class Constants {
 
     /* Chess script */
     static readonly BOARD_SIZE: number = 8;
+    static readonly OBSERVER_INTERVAL: number = 10; // ms
     
     /* General Chess Constants */
     static readonly FILES: string[] = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'];
