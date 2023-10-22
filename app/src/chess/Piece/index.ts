@@ -18,6 +18,20 @@ export class Piece implements IPiece {
     color: ColorType;
     type: PieceType;
 
+    /*
+     * TODO: Potentially modify the constructor to
+     *       a PieceFactory class.
+     *
+     * Reads the classList of an HTMLElement and
+     * constructs a Piece object from it.
+     * 
+     * Note: We cannot rely on the order of the
+     * classList, so we must check each class
+     * individually. (Thank you Chess.com)
+     * 
+     * @param {HTMLElement} element - The element to read.
+     * @returns {Piece} - The piece object.
+     */
     constructor(element: HTMLElement) {
         element.classList.forEach(className => {
             if (className.startsWith('piece')) { return; }
@@ -32,6 +46,11 @@ export class Piece implements IPiece {
         });
     }
 
+    /* 
+     * Return a text-reader friendly version 
+     * representation of the piece object. For
+     * most pieces, this is just the type.
+     */
     public to_speech (): string {
         return `${piece_type_to_name(this.type)}`;
     }

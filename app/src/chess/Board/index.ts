@@ -40,7 +40,7 @@ export class ChessBoard implements IChessBoard {
 
     speak_moves: boolean;
 
-    constructor(speak_moves=false) {
+    constructor(speak_moves: boolean = false) {
 
         this.board_element = document.getElementById('board-single') ? 
                              document.getElementById('board-single') : 
@@ -243,9 +243,20 @@ export class ChessBoard implements IChessBoard {
                         moved_piece.color
                     );
 
-                    console.log("here");
-
-                    MoveSpeaker.speak_message(moved_piece.to_speech() + ' to ' + coord.to_speech());
+                    /*
+                     * TODO: Move this to a better place.
+                     * TODO: Determine move vs. capture
+                     *       and change message accordingly.
+                     *
+                     * We can move this from here once
+                     * we have a better way to relay
+                     * moves to the user.
+                     */
+                    MoveSpeaker.speak_message(
+                        moved_piece.to_speech() + 
+                        ' to ' +
+                        coord.to_speech()
+                    );
                 }
             });
         });
@@ -511,5 +522,4 @@ export class ChessBoard implements IChessBoard {
     toString (): string {
         return '';
     }
-
 }
