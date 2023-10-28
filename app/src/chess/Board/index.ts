@@ -102,7 +102,7 @@ export class ChessBoard implements IChessBoard {
 
         const square_element: HTMLElement = this.board_element.querySelector(
             `.square-${move.from.file + 1}${move.from.rank + 1}`
-        )
+        );
 
         const square_length: number = square_element.getBoundingClientRect().width;
         const origin_offset_x: number = this.board_element.getBoundingClientRect().x;
@@ -222,17 +222,23 @@ export class ChessBoard implements IChessBoard {
          * the board element. When we observe a class 
          * mutation, we can trigger a board update.
          */
-        const move_indicator = this.board_element.children[2];
+        const first_move_indicator = this.board_element.children[2];
+        const second_move_indicator = this.board_element.children[3];
 
         var observer = new MutationObserver( event => {
             this.turn = invert_color(this.turn);
             this._update_board_after_move();
         })
 
-        observer.observe(move_indicator, {
+        observer.observe(first_move_indicator, {
             attributes: true,
             attributeFilter: ['class'],
         });
+
+        observer.observe(second_move_indicator, {
+            attributes: true,
+            attributeFilter: ['class'],
+        })
     }
 
     /*

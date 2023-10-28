@@ -27,6 +27,10 @@ import {
     find_pieces
 } from './utils';
 
+import {
+    file_to_index
+} from '../Coordinate/utils';
+
 export class MoveFactory implements IMoveFactory {
     /*
      * Given a user move string, return a Move object.
@@ -53,46 +57,70 @@ export class MoveFactory implements IMoveFactory {
     public static build_from_string(board: ChessBoard,  move: string): Move {
         if (!move.length) { return; }
 
-        /* 
-         * Mess with the logic a little because 'b' is a valid file,
-         * and 'B' is a valid piece type, so if we lowercase the move 
-         * text then we can't tell if it's a file or a piece type.
-         */
-        const is_pawn_move: boolean = Constants.FILES.includes(move.slice(0, 1));
-
-        if (is_pawn_move) { return this._create_pawn_move(board, move); }
-
-        /* Normalize the move text */
-        move = move.trim().toLowerCase();
-
         /* Determine if the move is a castle move. */
         if (move.slice(0, 1) === Constants.CASTLE_INDICATOR) {
             return this._create_castle_move(board, move);
         }
 
+        /* Normalize the move text */
+        move = move.trim().replace(/[x#+]/g, '');
+        if (move.length > 5) { return; }
+        
+        const destination_text: string = move.slice(-2);
+        /* 
+         * Mess with the logic a little because 'b' is a valid file,
+         * and 'B' is a valid piece type, so if we lowercase the move 
+         * text then we can't tell if it's a file or a piece type.
+         */
+        const is_pawn_move: boolean = Constants.FILES.includes(move.slice(0, 1).toLowerCase()) &&
+                                      move.slice(0,1).toLowerCase() == move.slice(0,1);
+
+        const is_promotion: boolean = false;
+        // if (is_pawn_move && )
+
+        move = move.toLowerCase();
+
         /* Handle all other moves the same */
-        const piece_type: PieceType = move.slice(0, 1) as PieceType;
+        const piece_type: PieceType = is_pawn_move ? 
+                                      PieceType.Pawn : move.slice(0, 1) as PieceType;
+
 
         const possible_pieces: Piece[] = find_pieces(board.pieces, board.player_color, piece_type);
 
         /* Exit early if there are no pieces of the given type. */
         if (!possible_pieces.length) { return; }
 
-        /*
-         * Determine where the piece is moving to.
-         * This is a little hacky because we do not
-         * want users who do not enter a capture indicator
-         * to have their moves rejected.
-         */
-        const destination_text: string = move.slice(1, 2) === Constants.CAPTURE_INDICATOR ?
-                                         move.slice(2) : move.slice(1);
+        let filtered_pieces: Piece[] = possible_pieces;
+
+        // if row or file is specified
+        if (move.length === 4){
+            const is_file: boolean = Constants.FILES.includes(move.slice(1, 2));
+            if (is_file){
+                filtered_pieces = possible_pieces.filter(piece => {
+                    return piece.location.file === file_to_index(move.slice(1, 2));
+                });
+            } else {
+                filtered_pieces = possible_pieces.filter(piece => {
+                    return piece.location.rank === parseInt(move.slice(1, 2)) - 1;
+                });
+            }
+        }
+        
+        // if ra and file is specified
+        if (move.length === 5){
+            // find piece at rank and file
+            filtered_pieces = possible_pieces.filter(piece => {
+                    return piece.location.file === file_to_index(move.slice(1, 2)) && 
+                           piece.location.rank === parseInt(     move.slice(2, 3)) - 1;
+            });
+        }
 
         const destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
 
         let move_piece: Piece;
 
         /* Iterate over all possible pieces and find the one that can move to the destination. */
-        possible_pieces.forEach(piece => {
+        filtered_pieces.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
                 /* 
                  * TODO: Handle resolve ambiguity.
@@ -115,6 +143,7 @@ export class MoveFactory implements IMoveFactory {
          * then the move is invalid.
          */
         if (!move_piece) {
+            MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_MOVE);
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
         }
 
