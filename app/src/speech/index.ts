@@ -1,3 +1,5 @@
+/* Speech Module beginning */
+
 type WindowSpeech = typeof window & {
     SpeechRecognition: any;
     webkitSpeechRecognition: any;
