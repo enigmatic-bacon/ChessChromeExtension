@@ -131,8 +131,7 @@ export class ChessBoard implements IChessBoard {
                 resolve, Constants.OBSERVER_INTERVAL
             )
         );
-
-        if (this._attempted_move) {
+        if (this._attempted_move && !move.promotion) {
             MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' + ErrorHelper.INVALID_MOVE);
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
             return;
@@ -149,6 +148,7 @@ export class ChessBoard implements IChessBoard {
                 - Rank 6 - Rook
                 - Rank 5 - Bishop
             */
+            console.log("here");
             let rank_offset: number;
             switch(move.promotion) {
                 case PieceType.Queen: rank_offset = 0;

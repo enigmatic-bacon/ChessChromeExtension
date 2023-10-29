@@ -66,8 +66,6 @@ export class MoveFactory implements IMoveFactory {
         move = move.trim().replace(/[x#+]/g, '');
         if (move.length > 5) { return; }
         
-        const destination_text: string = move.slice(-2);
-        const destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
         /* 
          * Mess with the logic a little because 'b' is a valid file,
          * and 'B' is a valid piece type, so if we lowercase the move 
@@ -79,12 +77,21 @@ export class MoveFactory implements IMoveFactory {
 
         move = move.toLowerCase();
 
+        /* Handle all other moves the same */
+        const piece_type: PieceType = is_pawn_move ? 
+        PieceType.Pawn : move.slice(0, 1) as PieceType;
+
         /* Possible promotion */
         let promotion_piece: PieceType = null;
         if (is_pawn_move && move.includes('=')){
-            const num_eq = move.match('/=/g');
+            console.log("move ", move);
+            const num_eq = move.split('=').length - 1;
+            console.log("num_eq", num_eq);
+            const rank = parseInt(move.slice(1, 2)) - 1;
+            console.log("rank", rank);
+            
             /* Can't have more than one equal sign */
-            if (num_eq.length > 1 || destination.rank != 6){
+            if (num_eq > 1 || rank != 7){
                 // throw error
                 MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_MOVE);
                 ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
@@ -106,23 +113,19 @@ export class MoveFactory implements IMoveFactory {
                 MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_PROMOTION);
                 ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_PROMOTION);
             }
-
             promotion_piece = move.charAt(eq_index + 1) as PieceType;
+            // remove promotion indicators
+            move = move.slice(0, -2);
         }
+
+        if (is_pawn_move) return this._create_pawn_move(board, move, promotion_piece);
         
-
-        /* Handle all other moves the same */
-        const piece_type: PieceType = is_pawn_move ? 
-                                      PieceType.Pawn : move.slice(0, 1) as PieceType;
-
-
         const possible_pieces: Piece[] = find_pieces(board.pieces, board.player_color, piece_type);
 
         /* Exit early if there are no pieces of the given type. */
         if (!possible_pieces.length) { return; }
 
         let filtered_pieces: Piece[] = possible_pieces;
-
         // if row or file is specified
         if (move.length === 4){
             const is_file: boolean = Constants.FILES.includes(move.slice(1, 2));
@@ -135,9 +138,7 @@ export class MoveFactory implements IMoveFactory {
                     return piece.location.rank === parseInt(move.slice(1, 2)) - 1;
                 });
             }
-        }
-        
-        // if ra and file is specified
+        } // if ra and file is specified
         if (move.length === 5){
             // find piece at rank and file
             filtered_pieces = possible_pieces.filter(piece => {
@@ -145,7 +146,8 @@ export class MoveFactory implements IMoveFactory {
                            piece.location.rank === parseInt(     move.slice(2, 3)) - 1;
             });
         }
-
+        const destination_text: string = move.slice(-2);
+        const destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
         let move_piece: Piece;
 
         /* Iterate over all possible pieces and find the one that can move to the destination. */
@@ -194,7 +196,7 @@ export class MoveFactory implements IMoveFactory {
      * @param {string} move - The user's move string.
      * @returns {Move} - The move object.
      */
-    private static _create_pawn_move(board: ChessBoard, move: string): Move {
+    private static _create_pawn_move(board: ChessBoard, move: string, promo: PieceType): Move {
         const possible_pawns: Piece[] = find_pieces(
             board.pieces,
             board.player_color,
@@ -231,7 +233,7 @@ export class MoveFactory implements IMoveFactory {
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
         }
 
-        return new Move(pawn.location, destination, null);
+        return new Move(pawn.location, destination, promo);
     }
 
     /*
