@@ -131,6 +131,7 @@ export class ChessBoard implements IChessBoard {
                 resolve, Constants.OBSERVER_INTERVAL
             )
         );
+        // scuffed for right now, just have extra flag for now so observer doesn't throw error on promotion
         if (this._attempted_move && !move.promotion) {
             MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' + ErrorHelper.INVALID_MOVE);
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
@@ -148,31 +149,51 @@ export class ChessBoard implements IChessBoard {
                 - Rank 6 - Rook
                 - Rank 5 - Bishop
             */
-            console.log("here");
+            // busy-wait for testing
+            const start = new Date().getTime();
+            while(new Date().getTime() - start < 5000){}
+
+            console.log("promotion piece: ", move.promotion);
             let rank_offset: number;
+            const old_rank = move.to.rank;
             switch(move.promotion) {
-                case PieceType.Queen: rank_offset = 0;
-                case PieceType.Knight: rank_offset = -1;
-                case PieceType.Rook: rank_offset = -2;
-                case PieceType.Bishop: rank_offset = -3;
+                case PieceType.Queen: {
+                    break;
+                }
+                case PieceType.Knight: {
+                    move.to.rank = 6;
+                    break;
+                }
+                case PieceType.Rook: {
+                    move.to.rank = 5;
+                    break;
+                }
+                case PieceType.Bishop: {
+                    move.to.rank = 4;
+                    break;
+                }
             }
+            console.log("rank of promotion: ", move.to.rank);
+            console.log("old y coord: ", square_length * (Constants.BOARD_SIZE - old_rank - 0.5) + origin_offset_y);
+            console.log("new y coord: ", square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5) + origin_offset_y)
 
             // click on promotion
-            let event = new PointerEvent('pointerdown', {
+            let ev = new PointerEvent('pointerdown', {
                 clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
-                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5 + rank_offset) + origin_offset_y,
+                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5) + origin_offset_y,
+                bubbles: true
+            });
+            this.board_element.dispatchEvent(ev);
+
+
+            ev = new PointerEvent('pointerup', {
+                clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
+                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5) + origin_offset_y,
                 bubbles: true
             });
 
-            this.board_element.dispatchEvent(event);
-
-            event = new PointerEvent('pointerup', {
-                clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
-                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5 + rank_offset) + origin_offset_y,
-                bubbles: true
-            });
-
-            this.board_element.dispatchEvent(event);
+            this.board_element.dispatchEvent(ev);
+            console.log("done");
         }
 
         return;
