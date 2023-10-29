@@ -67,6 +67,7 @@ export class MoveFactory implements IMoveFactory {
         if (move.length > 5) { return; }
         
         const destination_text: string = move.slice(-2);
+        const destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
         /* 
          * Mess with the logic a little because 'b' is a valid file,
          * and 'B' is a valid piece type, so if we lowercase the move 
@@ -75,10 +76,40 @@ export class MoveFactory implements IMoveFactory {
         const is_pawn_move: boolean = Constants.FILES.includes(move.slice(0, 1).toLowerCase()) &&
                                       move.slice(0,1).toLowerCase() == move.slice(0,1);
 
-        const is_promotion: boolean = false;
-        // if (is_pawn_move && )
 
         move = move.toLowerCase();
+
+        /* Possible promotion */
+        let promotion_piece: PieceType = null;
+        if (is_pawn_move && move.includes('=')){
+            const num_eq = move.match('/=/g');
+            /* Can't have more than one equal sign */
+            if (num_eq.length > 1 || destination.rank != 6){
+                // throw error
+                MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_MOVE);
+                ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
+            }
+
+            // check if valid promotion
+            const eq_index = move.indexOf('=');
+            if (eq_index >= move.length){ // no promotion piece specified
+                // prompt user to specify promotion piece
+                // throw error
+                MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_PROMOTION);
+                ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_PROMOTION);
+            }
+
+            // If unknown character promotion or promotion to pawn
+            if (!Constants.PIECE_TYPES.includes(move.charAt(eq_index + 1)) || move.charAt(eq_index + 1) == Constants.PIECE_TYPES.at(0)){
+                // prompt user to specify promotion piece
+                // throw error
+                MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_PROMOTION);
+                ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_PROMOTION);
+            }
+
+            promotion_piece = move.charAt(eq_index + 1) as PieceType;
+        }
+        
 
         /* Handle all other moves the same */
         const piece_type: PieceType = is_pawn_move ? 
@@ -115,20 +146,11 @@ export class MoveFactory implements IMoveFactory {
             });
         }
 
-        const destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
-
         let move_piece: Piece;
 
         /* Iterate over all possible pieces and find the one that can move to the destination. */
         filtered_pieces.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
-                /* 
-                 * TODO: Handle resolve ambiguity.
-                 * 
-                 * If a previous piece can move
-                 * to the destination, then the move 
-                 * is ambiguous.
-                 */
                 if (move_piece) {
                     MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.AMBIGUOUS_MOVE);
                     ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.AMBIGUOUS_MOVE);
@@ -147,7 +169,7 @@ export class MoveFactory implements IMoveFactory {
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
         }
 
-        return new Move(move_piece.location, destination);
+        return new Move(move_piece.location, destination, promotion_piece);
     }
 
     /*
@@ -158,7 +180,7 @@ export class MoveFactory implements IMoveFactory {
      * @returns {Move} - The move object.
      */
     public static build_from_coords(from: Coordinate, to: Coordinate): Move {
-        return new Move(from, to);
+        return new Move(from, to, null);
     }
 
     /*
@@ -209,7 +231,7 @@ export class MoveFactory implements IMoveFactory {
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
         }
 
-        return new Move(pawn.location, destination);
+        return new Move(pawn.location, destination, null);
     }
 
     /*
@@ -245,10 +267,12 @@ export class MoveFactory implements IMoveFactory {
 export class Move implements IMove {
     from: Coordinate;
     to: Coordinate;
+    promotion: PieceType;
 
-    constructor(from: Coordinate, to: Coordinate) {
+    constructor(from: Coordinate, to: Coordinate, promo: PieceType) {
         this.from = from;
         this.to = to;
+        this.promotion = promo;
     }
 
     /* 

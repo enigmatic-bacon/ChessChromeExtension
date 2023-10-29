@@ -3,6 +3,11 @@
 var mouse_down = false;
 var controls_visible = true;
 
+import {
+    init_listen,
+    listen
+} from '../speech/index';
+
 /* Inject the controls container into the page */
 const inject_board_html = async (): Promise<void> => {
 
@@ -60,6 +65,10 @@ const inject_dashboard = async (): Promise<void> => {
 
     await inject_board_html();
 
+    init_listen();
+
+    _initialize_voice_listener();
+
     add_container_movement();
 
     return;
@@ -116,6 +125,15 @@ const _initialize_minimizer_functions = (minimizer: HTMLElement): void => {
     });
 
     return;
+}
+
+const _initialize_voice_listener = (): void => {
+    const listen_btn: HTMLElement = document.getElementById('controls-speak');
+
+    listen_btn.addEventListener('click', () => {
+        console.log('Listening...');
+        listen();
+    });
 }
 
 export {

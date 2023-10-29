@@ -25,6 +25,7 @@ export class ErrorHelper {
     static readonly INVALID_COLOR = "Invalid color";
     static readonly INVALID_PIECE = "Invalid piece";
     static readonly INVALID_MOVE = "Invalid move";
+    static readonly INVALID_PROMOTION = "Invalid promotion";
     static readonly AMBIGUOUS_MOVE = "Ambiguous move";
 
     static throw_error(error: string, message: string): void {
