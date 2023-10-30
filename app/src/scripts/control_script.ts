@@ -65,8 +65,6 @@ const inject_dashboard = async (): Promise<void> => {
 
     await inject_board_html();
 
-    init_listen();
-
     _initialize_voice_listener();
 
     add_container_movement();
@@ -129,7 +127,11 @@ const _initialize_minimizer_functions = (minimizer: HTMLElement): void => {
 
 const _initialize_voice_listener = (): void => {
     const listen_btn: HTMLElement = document.getElementById('controls-speak');
+    
+    /* Initialize the speech recognition options */
+    init_listen();
 
+    /* Add the event listener to the listen button */
     listen_btn.addEventListener('click', () => {
         console.log('Listening...');
         listen();

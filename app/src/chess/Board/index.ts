@@ -132,8 +132,7 @@ export class ChessBoard implements IChessBoard {
             )
         );
         if (this._attempted_move && !move.promotion) {
-            MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' + ErrorHelper.INVALID_MOVE);
-            ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
+            ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE, true);
             return;
         }
 

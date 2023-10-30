@@ -1,30 +1,51 @@
-/* Speech Module beginning */
 
-type WindowSpeech = typeof window & {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+import {
+    SpeechClassifier
+} from './SpeechClassifier/index'
+
+import {
+    SpeechClassifierGrammar
+} from '../constants';
+
+import {
+    WindowSpeech,
+    SpeechRecognition
+} from './types';
+
+const speech_window: WindowSpeech = window as WindowSpeech;
+
+speech_window.SpeechRecognition = speech_window.SpeechRecognition ||
+                                  speech_window.webkitSpeechRecognition; 
+
+const recognition: SpeechRecognition = new speech_window.SpeechRecognition();
+
+const classifier = new SpeechClassifier(
+    SpeechClassifierGrammar.GENERAL_CHESS_WORDS, 
+    2
+);
+
+const _classify_result = (results: any): void => {
+    const transcript = Array.from(results).map(
+        result => result[0]
+    ).map(result => 
+        result.transcript
+    ).join('');
+
+    console.log(
+        classifier.classify_sentence(transcript)
+    );
+
 }
 
-(window as WindowSpeech).SpeechRecognition = 
-    (window as WindowSpeech).SpeechRecognition ||
-    (window as WindowSpeech).webkitSpeechRecognition; 
 
-const recognition = new (window as WindowSpeech).SpeechRecognition();
-
-recognition.maxAlternatives = 1;
-recognition.interimResults = false;
 
 const init_listen = () => {
-    recognition.addEventListener('result', e => { 
-        const transcript = Array.from(e.results) 
-            .map(result => result[0]) 
-            .map(result => result.transcript) 
-            .join('') 
-        console.log(transcript); 
-        recognition.stop();
-    });
 
-    recognition.addEventListener('end', () => {
+    recognition.maxAlternatives = 1;
+    recognition.interimResults = false;
+
+    recognition.addEventListener('result', e => {
+        _classify_result(e.results)
         recognition.stop();
     });
 }

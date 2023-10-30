@@ -93,8 +93,11 @@ export class MoveFactory implements IMoveFactory {
             /* Can't have more than one equal sign */
             if (num_eq > 1 || rank != 7){
                 // throw error
-                MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_MOVE);
-                ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
+                ErrorHelper.throw_error(
+                    ErrorHelper.E_ERROR,
+                    ErrorHelper.INVALID_MOVE,
+                    board.speak_moves
+                );
             }
 
             // check if valid promotion
@@ -102,16 +105,22 @@ export class MoveFactory implements IMoveFactory {
             if (eq_index >= move.length){ // no promotion piece specified
                 // prompt user to specify promotion piece
                 // throw error
-                MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_PROMOTION);
-                ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_PROMOTION);
+                ErrorHelper.throw_error(
+                    ErrorHelper.E_ERROR,
+                    ErrorHelper.INVALID_PROMOTION,
+                    board.speak_moves
+                );
             }
 
             // If unknown character promotion or promotion to pawn
             if (!Constants.PIECE_TYPES.includes(move.charAt(eq_index + 1)) || move.charAt(eq_index + 1) == Constants.PIECE_TYPES.at(0)){
                 // prompt user to specify promotion piece
                 // throw error
-                MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_PROMOTION);
-                ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_PROMOTION);
+                ErrorHelper.throw_error(
+                    ErrorHelper.E_ERROR,
+                    ErrorHelper.INVALID_PROMOTION,
+                    board.speak_moves
+                );
             }
             promotion_piece = move.charAt(eq_index + 1) as PieceType;
             // remove promotion indicators
@@ -154,8 +163,11 @@ export class MoveFactory implements IMoveFactory {
         filtered_pieces.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
                 if (move_piece) {
-                    MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.AMBIGUOUS_MOVE);
-                    ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.AMBIGUOUS_MOVE);
+                    ErrorHelper.throw_error(
+                        ErrorHelper.E_ERROR,
+                        ErrorHelper.AMBIGUOUS_MOVE,
+                        board.speak_moves
+                    );
                 }
 
                 move_piece = piece;
@@ -167,8 +179,11 @@ export class MoveFactory implements IMoveFactory {
          * then the move is invalid.
          */
         if (!move_piece) {
-            MoveSpeaker.speak_message(ErrorHelper.E_ERROR + ' ' +  ErrorHelper.INVALID_MOVE);
-            ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
+            ErrorHelper.throw_error(
+                ErrorHelper.E_ERROR,
+                ErrorHelper.INVALID_MOVE,
+                board.speak_moves
+            );
         }
 
         return new Move(move_piece.location, destination, promotion_piece);
@@ -222,7 +237,11 @@ export class MoveFactory implements IMoveFactory {
         possible_pawns.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
                 if (pawn) {
-                    ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.AMBIGUOUS_MOVE);
+                    ErrorHelper.throw_error(
+                        ErrorHelper.E_ERROR,
+                        ErrorHelper.AMBIGUOUS_MOVE,
+                        board.speak_moves
+                    );
                 }
 
                 pawn = piece;
@@ -230,7 +249,11 @@ export class MoveFactory implements IMoveFactory {
         });
 
         if (!pawn) {
-            ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE);
+            ErrorHelper.throw_error(
+                ErrorHelper.E_ERROR,
+                ErrorHelper.INVALID_MOVE,
+                board.speak_moves
+            );
         }
 
         return new Move(pawn.location, destination, promo);
