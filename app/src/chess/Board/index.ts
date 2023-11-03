@@ -122,7 +122,7 @@ export class ChessBoard implements IChessBoard {
             bubbles: true
         });
 
-        this.board_element.dispatchEvent(event);
+        this.board_element.dispatchEvent(event)
 
         this._attempted_move = true;
 
@@ -138,62 +138,20 @@ export class ChessBoard implements IChessBoard {
             return;
         }
 
-        // if there is a promotion and we made a valid move
-        /* TODO: needs to be tested */
         if (move.promotion){
-            /*
-                Promotion panel always drops down from the square in which a promotion takes place
-                Promotion options are also the same size as board squares
-                - Rank 8 - Queen
-                - Rank 7 - Knight
-                - Rank 6 - Rook
-                - Rank 5 - Bishop
-            */
-            // busy-wait for testing
-            const start = new Date().getTime();
-            while(new Date().getTime() - start < 5000){}
+            
+            const promotion_window: HTMLElement = document.querySelector(
+                '.promotion-window'
+            );
+            const promotion_piece: HTMLElement = promotion_window.querySelector(
+                `.${this.player_color}${move.promotion}`
+            );
 
-            console.log("promotion piece: ", move.promotion);
-            let rank_offset: number;
-            const old_rank = move.to.rank;
-            switch(move.promotion) {
-                case PieceType.Queen: {
-                    break;
-                }
-                case PieceType.Knight: {
-                    move.to.rank = 6;
-                    break;
-                }
-                case PieceType.Rook: {
-                    move.to.rank = 5;
-                    break;
-                }
-                case PieceType.Bishop: {
-                    move.to.rank = 4;
-                    break;
-                }
-            }
-            console.log("rank of promotion: ", move.to.rank);
-            console.log("old y coord: ", square_length * (Constants.BOARD_SIZE - old_rank - 0.5) + origin_offset_y);
-            console.log("new y coord: ", square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5) + origin_offset_y)
-
-            // click on promotion
-            let ev = new PointerEvent('pointerdown', {
-                clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
-                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5) + origin_offset_y,
-                bubbles: true
-            });
-            this.board_element.dispatchEvent(ev);
-
-
-            ev = new PointerEvent('pointerup', {
-                clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
-                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5) + origin_offset_y,
-                bubbles: true
-            });
-
-            this.board_element.dispatchEvent(ev);
-            console.log("done");
+            promotion_piece.dispatchEvent(new PointerEvent('pointerdown', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            }));
         }
 
         return;
