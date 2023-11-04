@@ -122,7 +122,7 @@ export class ChessBoard implements IChessBoard {
             bubbles: true
         });
 
-        this.board_element.dispatchEvent(event);
+        this.board_element.dispatchEvent(event)
 
         this._attempted_move = true;
 
@@ -131,47 +131,26 @@ export class ChessBoard implements IChessBoard {
                 resolve, Constants.OBSERVER_INTERVAL
             )
         );
+        // scuffed for right now, just have extra flag for now so observer doesn't throw error on promotion
         if (this._attempted_move && !move.promotion) {
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE, true);
             return;
         }
 
-        // if there is a promotion and we made a valid move
-        /* TODO: needs to be tested */
         if (move.promotion){
-            /*
-                Promotion panel always drops down from the square in which a promotion takes place
-                Promotion options are also the same size as board squares
-                - Rank 8 - Queen
-                - Rank 7 - Knight
-                - Rank 6 - Rook
-                - Rank 5 - Bishop
-            */
-            console.log("here");
-            let rank_offset: number;
-            switch(move.promotion) {
-                case PieceType.Queen: rank_offset = 0;
-                case PieceType.Knight: rank_offset = -1;
-                case PieceType.Rook: rank_offset = -2;
-                case PieceType.Bishop: rank_offset = -3;
-            }
+            
+            const promotion_window: HTMLElement = document.querySelector(
+                '.promotion-window'
+            );
+            const promotion_piece: HTMLElement = promotion_window.querySelector(
+                `.${this.player_color}${move.promotion}`
+            );
 
-            // click on promotion
-            let event = new PointerEvent('pointerdown', {
-                clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
-                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5 + rank_offset) + origin_offset_y,
-                bubbles: true
-            });
-
-            this.board_element.dispatchEvent(event);
-
-            event = new PointerEvent('pointerup', {
-                clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
-                clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5 + rank_offset) + origin_offset_y,
-                bubbles: true
-            });
-
-            this.board_element.dispatchEvent(event);
+            promotion_piece.dispatchEvent(new PointerEvent('pointerdown', {
+                view: window,
+                bubbles: true,
+                cancelable: true
+            }));
         }
 
         return;

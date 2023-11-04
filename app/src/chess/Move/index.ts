@@ -115,7 +115,7 @@ export class MoveFactory implements IMoveFactory {
             }
 
             // If unknown character promotion or promotion to pawn
-            if (!Constants.PIECE_TYPES.includes(move.charAt(eq_index + 1)) || move.charAt(eq_index + 1) == Constants.PIECE_TYPES.at(0)){
+            if (!Constants.PIECE_TYPES.includes(move.charAt(eq_index + 1)) || move.charAt(eq_index + 1) == Constants.PIECE_TYPES.at(0) || move.charAt(eq_index + 1) == Constants.PIECE_TYPES.at(5)){
                 // prompt user to specify promotion piece
                 // throw error
                 ErrorHelper.throw_error(
