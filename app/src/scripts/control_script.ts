@@ -34,7 +34,10 @@ const inject_board_html = async (): Promise<void> => {
     (container_minimizer as HTMLImageElement).src = chrome.runtime.getURL('/icons/drop-icon.png');
 
     /* Remove the sidebar ad, why not? */
-    document.getElementById('sidebar-ad').remove();
+    try {
+      document.getElementById('sidebar-ad').remove();
+    }
+    catch {}
 }
 
 /* Add movement to the controls container */

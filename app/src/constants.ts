@@ -43,8 +43,15 @@ export class ErrorHelper {
 
 export class MoveSpeaker {
     static speak_message(message: string): void {
-        const msg = new SpeechSynthesisUtterance(message);
+        const index = message.lastIndexOf('a');
+        let modifiedString = message;
+        if (index >= 0 && index === message.length - 2) {
+        // Replace the 'A' with 'hey'
+        modifiedString = message.slice(0, index) + 'A' + message.slice(index + 1);
+        }
+        const msg = new SpeechSynthesisUtterance(modifiedString);
         msg.lang = 'en-US';
+        console.log(msg);
         window.speechSynthesis.speak(msg);
     }
 }

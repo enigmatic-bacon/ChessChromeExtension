@@ -47,7 +47,9 @@ export class ChessBoard implements IChessBoard {
 
         this.board_element = document.getElementById('board-single') ? 
                              document.getElementById('board-single') : 
-                             document.getElementById('board-play-computer');
+                             document.getElementById('board-play-computer') ?
+                             document.getElementById('board-play-computer') :
+                             document.getElementById('board-analysis-board');
 
         this.player_color = this.board_element.classList.contains('flipped') ?
                             ColorType.Black : ColorType.White;

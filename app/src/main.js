@@ -29,7 +29,6 @@ const main = async () => {
         e.preventDefault();
 
         const move_text = get_move_from_form();
-
         let parsed_move;
         
         try {

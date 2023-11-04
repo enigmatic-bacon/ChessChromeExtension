@@ -86,11 +86,14 @@ export class MoveFactory implements IMoveFactory {
         /* Possible promotion */
         let promotion_piece: PieceType = null;
         if (is_pawn_move && move.includes('=')){
-            console.log("move ", move);
             const num_eq = move.split('=').length - 1;
-            console.log("num_eq", num_eq);
-            const rank = parseInt(move.slice(1, 2)) - 1;
-            console.log("rank", rank);
+            let rank;
+            if (move.length === 5){
+              rank = parseInt(move.slice(2, 3)) - 1;
+            }
+            else {
+              rank = parseInt(move.slice(1, 2)) - 1;
+            }
             
             /* Can't have more than one equal sign */
             if (num_eq > 1 || rank != 7){
@@ -105,8 +108,6 @@ export class MoveFactory implements IMoveFactory {
             // check if valid promotion
             const eq_index = move.indexOf('=');
             if (eq_index >= move.length){ // no promotion piece specified
-                // prompt user to specify promotion piece
-                // throw error
                 ErrorHelper.throw_error(
                     ErrorHelper.E_ERROR,
                     ErrorHelper.INVALID_PROMOTION,
@@ -116,8 +117,6 @@ export class MoveFactory implements IMoveFactory {
 
             // If unknown character promotion or promotion to pawn
             if (!Constants.PIECE_TYPES.includes(move.charAt(eq_index + 1)) || move.charAt(eq_index + 1) == Constants.PIECE_TYPES.at(0) || move.charAt(eq_index + 1) == Constants.PIECE_TYPES.at(5)){
-                // prompt user to specify promotion piece
-                // throw error
                 ErrorHelper.throw_error(
                     ErrorHelper.E_ERROR,
                     ErrorHelper.INVALID_PROMOTION,
@@ -125,7 +124,6 @@ export class MoveFactory implements IMoveFactory {
                 );
             }
             promotion_piece = move.charAt(eq_index + 1) as PieceType;
-            // remove promotion indicators
             move = move.slice(0, -2);
         }
 
@@ -160,7 +158,7 @@ export class MoveFactory implements IMoveFactory {
         const destination_text: string = move.slice(-2);
         const destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
         let move_piece: Piece;
-
+        // huh
         /* Iterate over all possible pieces and find the one that can move to the destination. */
         filtered_pieces.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
@@ -222,21 +220,28 @@ export class MoveFactory implements IMoveFactory {
 
         if(!possible_pawns.length) { return; }
 
-        let destination: Coordinate;
-
-        if (move.length === 2) {
-            destination = CoordinateFactory.build_from_string(move);
-        } else {
-            if (move.slice(1,2) === Constants.CAPTURE_INDICATOR) {
-                destination = CoordinateFactory.build_from_string(move.slice(2));
-            } else {
-                destination = CoordinateFactory.build_from_string(move.slice(1));
+        let destination_text = move.slice(-2);
+        let destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
+        
+        let filtered_pawns: Piece[] = possible_pawns;
+        if (move.length === 3){ // if we specify the file of a pawn
+          const is_file: boolean = Constants.FILES.includes(move.slice(0, 1));
+            if (is_file){
+                filtered_pawns = possible_pawns.filter(piece => {
+                    return piece.location.file === file_to_index(move.slice(0, 1));
+                });
+            } else { // should throw an error
+              ErrorHelper.throw_error(
+                ErrorHelper.E_ERROR,
+                ErrorHelper.INVALID_MOVE,
+                board.speak_moves
+              );
             }
+          
         }
 
         let pawn: Piece;
-
-        possible_pawns.forEach(piece => {
+        filtered_pawns.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
                 if (pawn) {
                     ErrorHelper.throw_error(
@@ -257,7 +262,6 @@ export class MoveFactory implements IMoveFactory {
                 board.speak_moves
             );
         }
-
         return new Move(pawn.location, destination, promo);
     }
 
