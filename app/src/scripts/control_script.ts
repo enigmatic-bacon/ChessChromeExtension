@@ -64,11 +64,11 @@ const get_move_from_form = (): string => {
     return move_input;
 }
 
-const inject_dashboard = async (): Promise<void> => {
+const inject_dashboard = async (listener_callback): Promise<void> => {
 
     await inject_board_html();
 
-    _initialize_voice_listener();
+    _initialize_voice_listener(listener_callback);
 
     add_container_movement();
 
@@ -128,11 +128,11 @@ const _initialize_minimizer_functions = (minimizer: HTMLElement): void => {
     return;
 }
 
-const _initialize_voice_listener = (): void => {
+const _initialize_voice_listener = (callback): void => {
     const listen_btn: HTMLElement = document.getElementById('controls-speak');
     
     /* Initialize the speech recognition options */
-    init_listen();
+    init_listen(callback);
 
     /* Add the event listener to the listen button */
     listen_btn.addEventListener('click', () => {

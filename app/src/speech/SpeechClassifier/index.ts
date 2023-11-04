@@ -3,6 +3,19 @@ import {
     SpeechClassifierResult
 } from '../types';
 
+import {
+    SpeechClassifierGrammar
+} from '../../constants';
+
+import {
+    word_to_piece
+} from './utils'
+
+import {
+    PieceType
+} from '../../chess/types';
+import { Piece } from '../../chess/Piece';
+
 export class SpeechClassifier implements ISpeechClassifier {
     grammar: string[];
 
@@ -83,6 +96,66 @@ export class SpeechClassifier implements ISpeechClassifier {
         });
 
         return results;
+    }
+
+    /*
+     * Given a list of results, returns the
+     * string-algebraic notation for the move
+     * 
+     * @param results The results of the classifier
+     * @returns {string} The string-algebraic notation for the move
+     */
+    public results_to_move(results: SpeechClassifierResult[][]): string {
+        let move: string = '';
+
+        const top_results: string[] = [];
+
+        results.forEach( result => {
+            top_results.push(result[0].word);
+        });
+
+        if (top_results.includes(SpeechClassifierGrammar.CASTLE_ACTIONS[0]) ||
+            top_results.includes(SpeechClassifierGrammar.CASTLE_ACTIONS[1])) {
+
+            /* long */
+            if (top_results.includes(SpeechClassifierGrammar.CASTLE_ACTIONS[2])) {
+                return 'O-O-O';
+            }
+            if (top_results.includes(SpeechClassifierGrammar.CASTLE_ACTIONS[3])) {
+                return 'O-O';
+            }
+            
+            return 'O-O?'
+        }
+
+        top_results.forEach( result => {
+            if (SpeechClassifierGrammar.CHESS_PIECES.includes(result)) {
+                /* Handle piece */
+                const piece_type: PieceType = word_to_piece(result);
+                if (piece_type === PieceType.Pawn) return;
+                if (piece_type === PieceType.Bishop) {
+                    move += PieceType.Bishop.toUpperCase();
+                    return;
+                }
+                
+                move += piece_type;
+                return;
+            }
+
+            if (SpeechClassifierGrammar.CHESS_COORDINATES.includes(result)) {
+                move += result;
+                return;
+            }
+
+            if (SpeechClassifierGrammar.PROMOTION_ACTIONS.includes(result)) {
+                move += '=';
+                return;
+            }
+        });
+
+        console.log(move);
+        
+        return move;
     }
 
     /*

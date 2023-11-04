@@ -28,7 +28,8 @@ import {
 } from '../Move/index';
 
 import {
-    invert_color
+    invert_color,
+    get_pieces_of_color
 } from './utils';
 
 
@@ -160,6 +161,24 @@ export class ChessBoard implements IChessBoard {
 
     public get_pgn(): string {
         return '';
+    }
+
+    public get_square_by_coord(coord: Coordinate): Square {
+        return this.board[coord.rank][coord.file];
+    }
+
+    public square_is_attacked(coord: Coordinate): boolean {
+        const pieces: Piece[] = get_pieces_of_color(
+            this.pieces, invert_color(this.turn)
+        );
+
+        for (let i = 0; i < pieces.length; i++) {
+            if (this.piece_can_move_to(pieces[i], coord)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public update_board_before_move(): void {

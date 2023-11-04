@@ -23,3 +23,9 @@ export const get_piece_index = (pieces: Piece[], piece: Piece): Nullable<number>
 
     return null;
 }
+
+export const get_pieces_of_color = (pieces: Piece[], color: ColorType): Piece[] => {
+    return pieces.filter((piece: Piece) => {
+        return piece.color === color;
+    });
+}
