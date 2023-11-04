@@ -21,28 +21,28 @@ const recognition: SpeechRecognition = new speech_window.SpeechRecognition();
 
 const classifier = new SpeechClassifier(
     SpeechClassifierGrammar.GENERAL_CHESS_WORDS, 
-    5
+    2
 );
 
-const _classify_result = (results: any): void => {
+const _classify_result = (results: any): string => {
     const transcript = Array.from(results).map(
         result => result[0]
     ).map(result => 
         result.transcript
     ).join('');
 
-    console.log(
+    return classifier.results_to_move(
         classifier.classify_sentence(transcript)
-    );
+    )
 }
 
-const init_listen = () => {
+const init_listen = (callback) => {
 
     recognition.maxAlternatives = 1;
     recognition.interimResults = false;
 
     recognition.addEventListener('result', e => {
-        _classify_result(e.results)
+        callback(_classify_result(e.results));
         recognition.stop();
     });
 }
@@ -53,6 +53,5 @@ export {
     init_listen,
     listen
 }
-
 
 

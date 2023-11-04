@@ -21,9 +21,12 @@ const speak_flag = true;
 
 const main = async () => {
 
-    await inject_dashboard();
-
     const board = new ChessBoard(speak_flag);
+
+    await inject_dashboard((move_str) => {
+        let move = MoveFactory.build_from_string(board, move_str, board.player_color);
+        board.make_move(move);
+    });
 
     document.getElementById('controls-move-form').addEventListener('submit', e => {
         e.preventDefault();

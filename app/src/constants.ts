@@ -67,13 +67,25 @@ export class SpeechClassifierGrammar {
 
     static readonly CHESS_ACTIONS: string[] = [
         'capture', 'captures', 'takes',
-        'to', 'move', 'moves',
-        'castle', 'castles'
+        'to', 'move', 'moves'
+    ];
+
+    static readonly CASTLE_ACTIONS: string[] = [
+        'castle', 'castles',
+        'long', 'short'
+    ];
+
+    static readonly PROMOTION_ACTIONS: string[] = [
+        'promotes', 'promote', 
+        'equals', 'equal'
     ];
 
     static readonly GENERAL_CHESS_WORDS: string[] = [
         ...SpeechClassifierGrammar.CHESS_PIECES,
         ...SpeechClassifierGrammar.CHESS_COORDINATES,
-        ...SpeechClassifierGrammar.CHESS_ACTIONS
+        ...SpeechClassifierGrammar.CHESS_ACTIONS,
+        ...SpeechClassifierGrammar.CASTLE_ACTIONS,
+        ...SpeechClassifierGrammar.PROMOTION_ACTIONS
+        
     ];
 }

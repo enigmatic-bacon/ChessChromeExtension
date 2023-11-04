@@ -60,7 +60,7 @@ export class MoveFactory implements IMoveFactory {
         board.update_board_before_move();
 
         /* Determine if the move is a castle move. */
-        if (move.slice(0, 1) === Constants.CASTLE_INDICATOR) {
+        if (move.slice(0, 1).toLowerCase() === Constants.CASTLE_INDICATOR) {
             return this._create_castle_move(board, move);
         }
 
@@ -276,13 +276,79 @@ export class MoveFactory implements IMoveFactory {
      */
     private static _create_castle_move(board: ChessBoard, castle_text: string): Move {
         castle_text = castle_text.split('-').join('');
+
+        if (castle_text.charAt(castle_text.length - 1) === '?') {
+            /* 
+             * First try short, if
+             * (1) piece in the way -> try long
+             * (2) square attacked -> try long
+             * (3) works -> try long
+             * 
+             * Then try long, if
+             * (1) piece in the way -> throw invalid
+             * (2) square attacked -> throw invalid
+             * (3) works, but short doesn't -> return long
+             * (4) works, and short works -> throw ambiguous
+             */
+
+            const first_short_coord: Coordinate = new Coordinate(0, 5);
+            const second_short_coord: Coordinate = new Coordinate(0, 6);
+            
+            const first_long_coord: Coordinate = new Coordinate(0, 3);
+            const second_long_coord: Coordinate = new Coordinate(0, 2);
+
+            /* Try short */
+            let can_castle_short: boolean = 
+                board.get_square_by_coord(first_short_coord).is_empty() &&
+                board.get_square_by_coord(second_short_coord).is_empty() &&
+                !board.square_is_attacked(first_short_coord) &&
+                !board.square_is_attacked(second_short_coord);
+
+            /* Try long */
+            let can_castle_long: boolean = 
+                board.get_square_by_coord(first_long_coord).is_empty() && 
+                board.get_square_by_coord(second_long_coord).is_empty() &&
+                !board.square_is_attacked(first_long_coord) &&
+                !board.square_is_attacked(second_long_coord);
+
+            if (can_castle_short && can_castle_long) {
+                ErrorHelper.throw_error(
+                    ErrorHelper.E_ERROR,
+                    ErrorHelper.AMBIGUOUS_MOVE,
+                    board.speak_moves
+                );
+            }
+
+            if (!can_castle_short && !can_castle_long) {
+                ErrorHelper.throw_error(
+                    ErrorHelper.E_ERROR,
+                    ErrorHelper.INVALID_MOVE,
+                    board.speak_moves
+                );
+            }
+
+            if (can_castle_short) {
+                return MoveFactory.build_from_coords(
+                    new Coordinate(0, 4),
+                    new Coordinate(0, 6)
+                )
+            }
+
+            return MoveFactory.build_from_coords(
+                new Coordinate(0, 4),
+                new Coordinate(0, 2)
+            )
+        }
         
+        /* Long castle */
         if (castle_text.length === 3) {
             return MoveFactory.build_from_coords(
                 new Coordinate(0, 4),
                 new Coordinate(0, 2)
             )
         }
+
+
         return MoveFactory.build_from_coords(
             new Coordinate(0, 4),
             new Coordinate(0, 6)
