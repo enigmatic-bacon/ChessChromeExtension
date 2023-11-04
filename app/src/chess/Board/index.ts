@@ -181,6 +181,10 @@ export class ChessBoard implements IChessBoard {
         return '';
     }
 
+    public update_board_before_move(): void {
+        this._initialize_pieces_and_board();
+    }
+
     /*
      * Updates the internal state of the board
      * class and all of its member variables.

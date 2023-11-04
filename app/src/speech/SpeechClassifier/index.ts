@@ -3,12 +3,6 @@ import {
     SpeechClassifierResult
 } from '../types';
 
-import {
-    ErrorHelper
-} from '../../constants';
-
-
-
 export class SpeechClassifier implements ISpeechClassifier {
     grammar: string[];
 

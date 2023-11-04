@@ -21,7 +21,7 @@ const recognition: SpeechRecognition = new speech_window.SpeechRecognition();
 
 const classifier = new SpeechClassifier(
     SpeechClassifierGrammar.GENERAL_CHESS_WORDS, 
-    2
+    5
 );
 
 const _classify_result = (results: any): void => {
@@ -34,10 +34,7 @@ const _classify_result = (results: any): void => {
     console.log(
         classifier.classify_sentence(transcript)
     );
-
 }
-
-
 
 const init_listen = () => {
 

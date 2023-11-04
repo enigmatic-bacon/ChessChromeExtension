@@ -57,6 +57,8 @@ export class MoveFactory implements IMoveFactory {
     public static build_from_string(board: ChessBoard,  move: string): Move {
         if (!move.length) { return; }
 
+        board.update_board_before_move();
+
         /* Determine if the move is a castle move. */
         if (move.slice(0, 1) === Constants.CASTLE_INDICATOR) {
             return this._create_castle_move(board, move);

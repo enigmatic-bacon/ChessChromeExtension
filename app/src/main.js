@@ -43,4 +43,4 @@ const main = async () => {
     });
 };
 
-await_page_load().then(main);
+main();
