@@ -532,6 +532,21 @@ export class ChessBoard implements IChessBoard {
         /*
          * TODO: Implement en passant HERE.
          */
+        if (pawn.color === ColorType.White) {
+            if (pawn.location.rank === 4 && coord.rank === 5) {
+                return this.board[coord.rank][coord.file].is_empty() &&
+                       this.board[coord.rank - 1][coord.file].piece.type === PieceType.Pawn && 
+                       this.board[coord.rank - 1][coord.file].piece.color !== pawn.color;
+            }
+        } else {
+            if (pawn.location.rank === 3 && coord.rank === 2) {
+                return Math.abs(pawn.location.file - coord.file) === 1 &&
+                       this.board[coord.rank][coord.file].is_empty() &&
+                       this.board[coord.rank + 1][coord.file].piece.type === PieceType.Pawn &&
+                       this.board[coord.rank + 1][coord.file].piece.color !== pawn.color; // might not be needed, could potentially cause bug (tried it without and it worked) 
+                                                                                        //added it after the test
+            }
+        }
 
         /* Quick check to see if the pawn is moving forward */
         if (pawn.location.file !== coord.file) { return false; }

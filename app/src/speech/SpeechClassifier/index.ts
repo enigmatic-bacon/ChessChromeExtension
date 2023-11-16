@@ -93,7 +93,7 @@ export class SpeechClassifier implements ISpeechClassifier {
 
         console.log(sentence);
         sentence.split(' ').forEach(word => {
-            if (word.length === 3) {
+            if (word.length === 3 && !SpeechClassifierGrammar.CHESS_RANKS_ALPHA.includes(word)) {
                 results.push(this.classify_word(word.charAt(0)));
                 results.push(this.classify_word(word.slice(-2)));
             }
@@ -154,6 +154,11 @@ export class SpeechClassifier implements ISpeechClassifier {
             if (SpeechClassifierGrammar.CHESS_RANKS.includes(result) || 
                 SpeechClassifierGrammar.CHESS_FILES.includes(result)) {
                 move += result;
+                return;
+            }
+
+            if (SpeechClassifierGrammar.CHESS_RANKS_ALPHA.includes(result)) {
+                move += SpeechClassifierGrammar.CHESS_RANKS_ALPHA.indexOf(result) + 1;
                 return;
             }
 
