@@ -91,15 +91,14 @@ export class SpeechClassifier implements ISpeechClassifier {
     public classify_sentence(sentence: string): SpeechClassifierResult[][] {
         const results: SpeechClassifierResult[][] = [];
 
-        console.log(sentence);
         sentence.split(' ').forEach(word => {
             if (word.length === 3 && !SpeechClassifierGrammar.CHESS_RANKS_ALPHA.includes(word)) {
                 results.push(this.classify_word(word.charAt(0)));
                 results.push(this.classify_word(word.slice(-2)));
+                return;
             }
-            else {
+            
             results.push(this.classify_word(word));
-            }
         });
 
         return results;
@@ -120,8 +119,6 @@ export class SpeechClassifier implements ISpeechClassifier {
         results.forEach( result => {
             top_results.push(result[0].word);
         });
-
-        console.log(top_results.join(' '));
 
         if (top_results.includes(SpeechClassifierGrammar.CASTLE_ACTIONS[0]) ||
             top_results.includes(SpeechClassifierGrammar.CASTLE_ACTIONS[1])) {
@@ -172,13 +169,7 @@ export class SpeechClassifier implements ISpeechClassifier {
                 return;
             }
 
-            // if (SpeechClassifierGrammar.CHESS_AMBIGIOUS_ACTIONS.includes(result)) {
-            //     move += result;
-            //     return;
-            // }
         });
-
-        console.log(move);
         
         return move;
     }

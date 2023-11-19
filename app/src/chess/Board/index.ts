@@ -195,15 +195,6 @@ export class ChessBoard implements IChessBoard {
     private _update_board_after_move(): void {
         this._attempted_move = false;
 
-        /* 
-         * Somebody smarter than me can figure out
-         * how to do this better. Currently, we
-         * just re-read the whole board, but we
-         * could theoretically rely on an internal
-         * state instead.
-         */
-        this._initialize_pieces_and_board();
-
         /*
          * TODO: FIXME
          *
@@ -212,6 +203,15 @@ export class ChessBoard implements IChessBoard {
          * the move to the user.
          */
         this._initialize_turn();
+
+        /* 
+         * Somebody smarter than me can figure out
+         * how to do this better. Currently, we
+         * just re-read the whole board, but we
+         * could theoretically rely on an internal
+         * state instead.
+         */
+        this._initialize_pieces_and_board();
 
         return;
     }
@@ -294,6 +294,10 @@ export class ChessBoard implements IChessBoard {
             child => String(child.className).startsWith('highlight')
         );
 
+        let capture_sum: number = 0;
+        let moved_piece: Piece = null;
+        let moved_to: Coordinate = null;
+
         last_move_pair.forEach(move_html => {
             move_html.classList.forEach(className => {
                 if (!className.startsWith('square')) { return; }
@@ -301,29 +305,41 @@ export class ChessBoard implements IChessBoard {
                 const coord: Coordinate = CoordinateFactory.build_from_class(className);
 
                 if (this.board[coord.rank][coord.file].piece) {
-                    const moved_piece = this.board[coord.rank][coord.file].piece;
+                    capture_sum += 1;
 
-                    this.turn = invert_color(
-                        moved_piece.color
-                    );
+                    const current_piece = this.board[coord.rank][coord.file].piece;
 
-                    /*
-                     * TODO: Move this to a better place.
-                     * TODO: Determine move vs. capture
-                     *       and change message accordingly.
-                     *
-                     * We can move this from here once
-                     * we have a better way to relay
-                     * moves to the user.
-                     */
-                    MoveSpeaker.speak_message(
-                        moved_piece.to_speech() + 
-                        ' to ' +
-                        coord.to_speech()
-                    );
+                    if(current_piece.color === invert_color(this.turn)) {
+                        moved_piece = current_piece;
+                    } else if (current_piece.color === this.turn) {
+                        moved_to = current_piece.location;
+                    }
+                } else {
+                    moved_to = coord;
                 }
             });
         });
+
+        /*
+         * TODO: Move this to a better place.
+         * TODO: Determine move vs. capture
+         *       and change message accordingly.
+         *
+         * We can move this from here once
+         * we have a better way to relay
+         * moves to the user.
+         */
+        if (this.speak_moves && moved_piece && moved_to) {
+            const is_capture: boolean = capture_sum > 1;
+            const action: string = is_capture ? ' takes ' : ' to ';
+            
+            MoveSpeaker.speak_message(
+                moved_piece.to_speech() + 
+                action +
+                moved_to.to_speech()
+            );
+        }
+            
     }
 
     /*

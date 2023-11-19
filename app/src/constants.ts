@@ -70,9 +70,9 @@ export class SpeechClassifierGrammar {
     ];
 
     static readonly CHESS_RANKS_ALPHA: string[] = [
-        'one', 'two', 'three', 'four', 'five',
-        'six', 'seven', 'eight'
-    ];
+        'one', 'two', 'three', 'four', 
+        'five', 'six', 'seven', 'eight',
+    ]
 
     static readonly CHESS_COORDINATES: string[] = [
         'a1', 'a2', 'a3', 'a4', 'a5', 'a6', 'a7', 'a8',
@@ -86,8 +86,8 @@ export class SpeechClassifierGrammar {
     ];
 
     static readonly CHESS_ACTIONS: string[] = [
-        'capture', 'captures', 'takes',
-        'to', 'move', 'moves'
+        'capture', 'captures', 'takes', 
+        'move', 'to', 'moves'
     ];
 
     static readonly CASTLE_ACTIONS: string[] = [
@@ -108,7 +108,7 @@ export class SpeechClassifierGrammar {
         ...SpeechClassifierGrammar.PROMOTION_ACTIONS,
         ...SpeechClassifierGrammar.CHESS_FILES,
         ...SpeechClassifierGrammar.CHESS_RANKS,
-        ...SpeechClassifierGrammar.CHESS_RANKS_ALPHA
+        //...SpeechClassifierGrammar.CHESS_AMBIGIOUS_ACTIONS
         
     ];
 }
