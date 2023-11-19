@@ -52,8 +52,9 @@ export class ChessBoard implements IChessBoard {
                              document.getElementById('board-play-computer') :
                              document.getElementById('board-analysis-board');
 
-        this.player_color = this.board_element.classList.contains('flipped') ?
-                            ColorType.Black : ColorType.White;
+        // this.player_color = this.board_element.classList.contains('flipped') ?
+        //                     ColorType.Black : ColorType.White;
+        // console.log("player color in constructor", this.player_color);
 
         this.speak_moves = speak_moves;
         
@@ -102,6 +103,16 @@ export class ChessBoard implements IChessBoard {
      * @param move: Move (Move to make)
      */
     public async make_move(move: Move): Promise<void> {
+        console.log("pre translated move: ", move);
+
+        if (this.player_color === ColorType.Black){
+            move.from.rank = Math.abs(move.from.rank - 7);
+            move.to.rank = Math.abs(move.to.rank - 7);
+            move.from.file = Math.abs(move.from.file - 7);
+            move.to.file = Math.abs(move.to.file - 7);
+        }
+
+        console.log("post transalted move", move);
 
         const square_element: HTMLElement = this.board_element.querySelector(
             `.square-${move.from.file + 1}${move.from.rank + 1}`
@@ -289,6 +300,9 @@ export class ChessBoard implements IChessBoard {
      * the opposite color as the current turn.
      */
     private _initialize_turn(): void {
+        this.player_color = this.board_element.classList.contains('flipped') ?
+        ColorType.Black : ColorType.White;
+console.log("player color in initilialize turn", this.player_color);
         
         const last_move_pair: Element[] = Array.from(this.board_element.children).filter(
             child => String(child.className).startsWith('highlight')
@@ -546,7 +560,9 @@ export class ChessBoard implements IChessBoard {
         }
 
         /*
-         * TODO: Implement en passant HERE.
+         * Can En passant if the pawn is next to another 
+         * pawn of the opposite color, and the destination
+         * square is not occupied. (observer handles other cases)
          */
         if (pawn.color === ColorType.White) {
             if (pawn.location.rank === 4 && coord.rank === 5) {
@@ -559,8 +575,7 @@ export class ChessBoard implements IChessBoard {
                 return Math.abs(pawn.location.file - coord.file) === 1 &&
                        this.board[coord.rank][coord.file].is_empty() &&
                        this.board[coord.rank + 1][coord.file].piece.type === PieceType.Pawn &&
-                       this.board[coord.rank + 1][coord.file].piece.color !== pawn.color; // might not be needed, could potentially cause bug (tried it without and it worked) 
-                                                                                        //added it after the test
+                       this.board[coord.rank + 1][coord.file].piece.color !== pawn.color;
             }
         }
 
@@ -599,6 +614,8 @@ export class ChessBoard implements IChessBoard {
                        this.board[coord.rank][coord.file].is_empty();
             }
         } else {
+            console.log("pawn location: ", pawn.location);
+            console.log("coordinate destination: ", coord);
             if (pawn.location.rank === coord.rank + 1) {
                 return pawn.location.file === coord.file &&
                        this.board[coord.rank][coord.file].is_empty();

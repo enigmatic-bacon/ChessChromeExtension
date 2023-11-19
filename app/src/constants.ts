@@ -108,7 +108,6 @@ export class SpeechClassifierGrammar {
         ...SpeechClassifierGrammar.PROMOTION_ACTIONS,
         ...SpeechClassifierGrammar.CHESS_FILES,
         ...SpeechClassifierGrammar.CHESS_RANKS,
-        //...SpeechClassifierGrammar.CHESS_AMBIGIOUS_ACTIONS
         
     ];
 }

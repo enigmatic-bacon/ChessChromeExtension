@@ -45,4 +45,4 @@ const main = async () => {
     });
 };
 
-main();
+await_page_load().then(main());

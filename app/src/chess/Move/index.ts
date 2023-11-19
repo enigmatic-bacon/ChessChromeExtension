@@ -212,16 +212,21 @@ export class MoveFactory implements IMoveFactory {
      * @returns {Move} - The move object.
      */
     private static _create_pawn_move(board: ChessBoard, move: string, promo: PieceType): Move {
-        const possible_pawns: Piece[] = find_pieces(
-            board.pieces,
-            board.player_color,
-            PieceType.Pawn
-        );
+        console.log("player color : ", board.player_color);
+        // const possible_pawns: Piece[] = find_pieces(
+        //     board.pieces,
+        //     board.player_color,
+        //     PieceType.Pawn
+        // );
+        // grab possible pawns from board instead of piece array
+        const possible_pawns: Piece[] = board.board.flatMap(row => row.filter(square => square.piece && square.piece.color === board.player_color && square.piece.type === PieceType.Pawn).map(square => square.piece));
+        console.log(board);
 
         if(!possible_pawns.length) { return; }
 
         let destination_text = move.slice(-2);
         let destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
+        console.log("destination for move: ", destination);
         
         let filtered_pawns: Piece[] = possible_pawns;
         if (move.length === 3){ // if we specify the file of a pawn
@@ -239,7 +244,10 @@ export class MoveFactory implements IMoveFactory {
             }
           
         }
+        // SOMETHING SUS HAPPENING HERE WITH PAWN RETRIEVAL
+        console.log("filtered pawns", filtered_pawns);
 
+        // SOMETHING SUS HAPPENING HERE WITH PAWN RETRIEVAL
         let pawn: Piece;
         filtered_pawns.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
@@ -250,7 +258,7 @@ export class MoveFactory implements IMoveFactory {
                         board.speak_moves
                     );
                 }
-
+                console.log("chosen piece that can move to dest", piece);
                 pawn = piece;
             }
         });
@@ -262,6 +270,7 @@ export class MoveFactory implements IMoveFactory {
                 board.speak_moves
             );
         }
+        console.log("chosen pawn", pawn);
         return new Move(pawn.location, destination, promo);
     }
 
