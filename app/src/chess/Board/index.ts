@@ -42,7 +42,7 @@ export class ChessBoard implements IChessBoard {
 
     speak_moves: boolean;
 
-    private _atmoveted_move: boolean = false;
+    private _attempted_move: boolean = false;
 
     constructor(speak_moves: boolean = false) {
 
@@ -152,7 +152,7 @@ export class ChessBoard implements IChessBoard {
 
         this.board_element.dispatchEvent(event)
 
-        this._atmoveted_move = true;
+        this._attempted_move = true;
 
         await new Promise(
             resolve => setTimeout(
@@ -160,7 +160,7 @@ export class ChessBoard implements IChessBoard {
             )
         );
         // scuffed for right now, just have extra flag for now so observer doesn't throw error on promotion
-        if (this._atmoveted_move && !move.promotion) {
+        if (this._attempted_move && !move.promotion) {
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE, true);
             return;
         }
@@ -218,7 +218,7 @@ export class ChessBoard implements IChessBoard {
      * also not a huge deal.
      */
     private _update_board_after_move(): void {
-        this._atmoveted_move = false;
+        this._attempted_move = false;
 
         /*
          * TODO: FIXME
@@ -315,8 +315,7 @@ export class ChessBoard implements IChessBoard {
      */
     private _initialize_turn(): void {
         this.player_color = this.board_element.classList.contains('flipped') ?
-        ColorType.Black : ColorType.White;
-console.log("player color in initilialize turn", this.player_color);
+                            ColorType.Black : ColorType.White;
         
         const last_move_pair: Element[] = Array.from(this.board_element.children).filter(
             child => String(child.className).startsWith('highlight')
