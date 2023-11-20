@@ -226,7 +226,7 @@ export class MoveFactory implements IMoveFactory {
 
         let destination_text = move.slice(-2);
         let destination: Coordinate = CoordinateFactory.build_from_string(destination_text);
-        console.log("destination for move: ", destination);
+        console.log("coords for destination: ", destination);
         
         let filtered_pawns: Piece[] = possible_pawns;
         if (move.length === 3){ // if we specify the file of a pawn
@@ -236,6 +236,7 @@ export class MoveFactory implements IMoveFactory {
                     return piece.location.file === file_to_index(move.slice(0, 1));
                 });
             } else { // should throw an error
+                console.log("shouldn't be possible");
               ErrorHelper.throw_error(
                 ErrorHelper.E_ERROR,
                 ErrorHelper.INVALID_MOVE,
@@ -244,10 +245,7 @@ export class MoveFactory implements IMoveFactory {
             }
           
         }
-        // SOMETHING SUS HAPPENING HERE WITH PAWN RETRIEVAL
-        console.log("filtered pawns", filtered_pawns);
 
-        // SOMETHING SUS HAPPENING HERE WITH PAWN RETRIEVAL
         let pawn: Piece;
         filtered_pawns.forEach(piece => {
             if (board.piece_can_move_to(piece, destination)) {
@@ -258,19 +256,21 @@ export class MoveFactory implements IMoveFactory {
                         board.speak_moves
                     );
                 }
-                console.log("chosen piece that can move to dest", piece);
                 pawn = piece;
+                console.log("pawn:", pawn);
             }
         });
 
+        // console.log("filtered pawns:", filtered_pawns);
         if (!pawn) {
+            console.log("no piece can move to specified destination");
             ErrorHelper.throw_error(
                 ErrorHelper.E_ERROR,
                 ErrorHelper.INVALID_MOVE,
                 board.speak_moves
             );
         }
-        console.log("chosen pawn", pawn);
+        console.log("chosen pawn - file:", pawn.location.file, " rank:", pawn.location.rank);
         return new Move(pawn.location, destination, promo);
     }
 

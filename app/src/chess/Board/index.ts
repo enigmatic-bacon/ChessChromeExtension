@@ -42,7 +42,7 @@ export class ChessBoard implements IChessBoard {
 
     speak_moves: boolean;
 
-    private _attempted_move: boolean = false;
+    private _atmoveted_move: boolean = false;
 
     constructor(speak_moves: boolean = false) {
 
@@ -52,9 +52,9 @@ export class ChessBoard implements IChessBoard {
                              document.getElementById('board-play-computer') :
                              document.getElementById('board-analysis-board');
 
-        // this.player_color = this.board_element.classList.contains('flipped') ?
-        //                     ColorType.Black : ColorType.White;
-        // console.log("player color in constructor", this.player_color);
+        this.player_color = this.board_element.classList.contains('flipped') ?
+                            ColorType.Black : ColorType.White;
+        console.log("player color in constructor", this.player_color);
 
         this.speak_moves = speak_moves;
         
@@ -93,6 +93,10 @@ export class ChessBoard implements IChessBoard {
             default:
                 return false;
         }
+        // WHEN CAPTURING, WRONG PIECE IS SAID. (i.e, pawn at b6 captures bishop at a5,
+        //                                                     speaker: "bishop takes b6",
+        //                                                         knight at d5 captures pawn at c7,
+        //                                                      speaker: "pawn takes d5")
     }
 
     /*
@@ -103,17 +107,26 @@ export class ChessBoard implements IChessBoard {
      * @param move: Move (Move to make)
      */
     public async make_move(move: Move): Promise<void> {
-        console.log("pre translated move: ", move);
+        console.log("move:", move.to, move.from);
 
+        // make a copy of to and from, in order to not modify the original move/piece coords
+        let from_file = move.from.file;
+        let from_rank = move.from.rank;
+        let to_file = move.to.file;
+        let to_rank = move.to.rank;
+
+        // if the player is black, invert the coords
         if (this.player_color === ColorType.Black){
-            move.from.rank = Math.abs(move.from.rank - 7);
-            move.to.rank = Math.abs(move.to.rank - 7);
-            move.from.file = Math.abs(move.from.file - 7);
-            move.to.file = Math.abs(move.to.file - 7);
+            from_rank = Math.abs(move.from.rank - 7);
+            from_file = Math.abs(move.from.file - 7);
+            to_rank = Math.abs(move.to.rank - 7);
+            to_file = Math.abs(move.to.file - 7);
         }
 
-        console.log("post transalted move", move);
+        console.log("inverted from:", from_rank, from_file);
+        console.log("inverted to:", to_rank, to_file);
 
+        // current real positions on the board as input
         const square_element: HTMLElement = this.board_element.querySelector(
             `.square-${move.from.file + 1}${move.from.rank + 1}`
         );
@@ -122,23 +135,24 @@ export class ChessBoard implements IChessBoard {
         const origin_offset_x: number = this.board_element.getBoundingClientRect().x;
         const origin_offset_y: number = this.board_element.getBoundingClientRect().y;
 
+        // if black, clientX and Y will use inverted coords
         let event = new PointerEvent('pointerdown', {
-            clientX: square_length * (move.from.file + 0.5) + origin_offset_x,
-            clientY: square_length * (Constants.BOARD_SIZE - move.from.rank - 0.5) + origin_offset_y,
+            clientX: square_length * (from_file + 0.5) + origin_offset_x,
+            clientY: square_length * (Constants.BOARD_SIZE - from_rank - 0.5) + origin_offset_y,
             bubbles: true
         });
 
         this.board_element.dispatchEvent(event);
 
         event = new PointerEvent('pointerup', {
-            clientX: square_length * (move.to.file + 0.5) + origin_offset_x,
-            clientY: square_length * (Constants.BOARD_SIZE - move.to.rank - 0.5) + origin_offset_y,
+            clientX: square_length * (to_file + 0.5) + origin_offset_x,
+            clientY: square_length * (Constants.BOARD_SIZE - to_rank - 0.5) + origin_offset_y,
             bubbles: true
         });
 
         this.board_element.dispatchEvent(event)
 
-        this._attempted_move = true;
+        this._atmoveted_move = true;
 
         await new Promise(
             resolve => setTimeout(
@@ -146,7 +160,7 @@ export class ChessBoard implements IChessBoard {
             )
         );
         // scuffed for right now, just have extra flag for now so observer doesn't throw error on promotion
-        if (this._attempted_move && !move.promotion) {
+        if (this._atmoveted_move && !move.promotion) {
             ErrorHelper.throw_error(ErrorHelper.E_ERROR, ErrorHelper.INVALID_MOVE, true);
             return;
         }
@@ -204,7 +218,7 @@ export class ChessBoard implements IChessBoard {
      * also not a huge deal.
      */
     private _update_board_after_move(): void {
-        this._attempted_move = false;
+        this._atmoveted_move = false;
 
         /*
          * TODO: FIXME
@@ -565,13 +579,13 @@ console.log("player color in initilialize turn", this.player_color);
          * square is not occupied. (observer handles other cases)
          */
         if (pawn.color === ColorType.White) {
-            if (pawn.location.rank === 4 && coord.rank === 5) {
+            if (pawn.location.rank === 4 && pawn.location.file !== coord.file) {
                 return this.board[coord.rank][coord.file].is_empty() &&
                        this.board[coord.rank - 1][coord.file].piece.type === PieceType.Pawn && 
                        this.board[coord.rank - 1][coord.file].piece.color !== pawn.color;
             }
         } else {
-            if (pawn.location.rank === 3 && coord.rank === 2) {
+            if (pawn.location.rank === 3 && pawn.location.file !== coord.file) {
                 return Math.abs(pawn.location.file - coord.file) === 1 &&
                        this.board[coord.rank][coord.file].is_empty() &&
                        this.board[coord.rank + 1][coord.file].piece.type === PieceType.Pawn &&
@@ -614,8 +628,6 @@ console.log("player color in initilialize turn", this.player_color);
                        this.board[coord.rank][coord.file].is_empty();
             }
         } else {
-            console.log("pawn location: ", pawn.location);
-            console.log("coordinate destination: ", coord);
             if (pawn.location.rank === coord.rank + 1) {
                 return pawn.location.file === coord.file &&
                        this.board[coord.rank][coord.file].is_empty();
